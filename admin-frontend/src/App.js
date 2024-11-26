@@ -5,23 +5,60 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Users from "./pages/Users";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Login from "./pages/Login";
-import PrivateRoute from "./components/PrivateRoute";
+import Dashboard from "./pages/Dashboard";
+import Articles from "./pages/Articles";
+import ArticleForm from "./pages/ArticleForm";
+import Categories from "./pages/Categories";
+import Users from "./pages/Users";
+import Supervisors from "./pages/Supervisors";
+import Tags from "./pages/Tags";
+import MenuBar from "./components/MenuBar";
 
-
-function App() {
+const App = () => {
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/users" element={<Users />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/users" replace />} />
-      </Routes>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </Router>
   );
-}
+};
+
+const AppRoutes = () => {
+  const { currentUser } = useAuth();
+
+  return (
+    <>
+      {currentUser ? (
+        // 認証済みユーザー向けのレイアウト
+        <div className="flex">
+          <MenuBar />
+          <div className="flex-1 ml-64 p-6 bg-gray-100 min-h-screen">
+            <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/articles" element={<Articles />} />
+              <Route path="/articles/new" element={<ArticleForm />} />
+              <Route path="/articles/edit/:slug" element={<ArticleForm />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/supervisors" element={<Supervisors />} />{" "}
+              {/* 追加 */}
+              <Route path="/tags" element={<Tags />} /> {/* 追加 */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </div>
+        </div>
+      ) : (
+        // 未認証ユーザー向けのレイアウト（Loginページのみ）
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      )}
+    </>
+  );
+};
 
 export default App;
