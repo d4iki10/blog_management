@@ -1,5 +1,6 @@
 class Api::V1::ArticlesController < ApplicationController
   before_action :set_article, only: [:show, :update, :destroy]
+  skip_before_action :authorize_request, only: [:index, :show]
 
   # GET /api/v1/articles
   def index

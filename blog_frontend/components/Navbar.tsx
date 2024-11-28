@@ -4,15 +4,19 @@ import Link from "next/link";
 const Navbar: React.FC = () => {
     return (
         <nav style={navStyle}>
-            <ul style={ulStyle}>
+        <ul style={ulStyle}>
             <li>
-                <Link href="/">ホーム</Link>
+            <Link href="/" style={linkStyle}>
+                ホーム
+            </Link>
             </li>
             <li>
-                <Link href="/articles">記事一覧</Link>
+            <Link href="/articles" style={linkStyle}>
+                記事一覧
+            </Link>
             </li>
             {/* 他のナビゲーションリンクを追加可能 */}
-            </ul>
+        </ul>
         </nav>
     );
 };

@@ -12,14 +12,18 @@ interface Article {
 }
 
 const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
+    console.log("ArticleCard:", article);
     return (
         <div style={cardStyle}>
         <h2>
-            <Link href={`/${article.category.slug}/${article.slug}`}>
+            <Link
+            href={`/${article.category.slug}/${article.slug}`}
+            style={titleStyle}
+            >
             {article.title}
             </Link>
         </h2>
-            <p>カテゴリ: {article.category.name}</p>
+        <p>カテゴリ: {article.category.name}</p>
         </div>
     );
 };
