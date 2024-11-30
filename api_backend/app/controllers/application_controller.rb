@@ -18,6 +18,11 @@ class ApplicationController < ActionController::API
     end
   end
 
+  # current_userメソッドを追加
+  def current_user
+    @current_user
+  end
+
   def jwt_encode(payload, exp = 24.hours.from_now)
     payload[:exp] = exp.to_i
     secret_key = Rails.application.credentials.secret_key_base

@@ -10,7 +10,11 @@ Rails.application.routes.draw do
 
       # リソース
       resources :users
-      resources :articles, param: :slug
+      resources :articles, param: :slug do
+        member do
+          post 'publish'
+        end
+      end
       resources :categories, param: :slug
       resources :tags
       resources :supervisors

@@ -9,7 +9,9 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Articles from "./pages/Articles";
+import ArticlePage from "./pages/ArticlePage";
 import ArticleForm from "./pages/ArticleForm";
+import AutoGenerateArticle from "./pages/AutoGenerateArticle"; // 追加
 import Categories from "./pages/Categories";
 import Users from "./pages/Users";
 import Supervisors from "./pages/Supervisors";
@@ -41,6 +43,13 @@ const AppRoutes = () => {
               <Route path="/articles" element={<Articles />} />
               <Route path="/articles/new" element={<ArticleForm />} />
               <Route path="/articles/edit/:slug" element={<ArticleForm />} />
+              <Route path="/:category/:slug" element={<ArticlePage />} />{" "}
+              {/* 追加 */}
+              <Route
+                path="/articles/auto-generate"
+                element={<AutoGenerateArticle />}
+              />{" "}
+              {/* 追加 */}
               <Route path="/categories" element={<Categories />} />
               <Route path="/users" element={<Users />} />
               <Route path="/supervisors" element={<Supervisors />} />{" "}

@@ -1,6 +1,7 @@
 class ArticleSerializer < ActiveModel::Serializer
-  attributes :id, :title, :content, :slug, :category, :supervisor, :tags, :created_at, :updated_at
+  attributes :id, :title, :content, :slug, :category, :supervisor, :tags, :status, :created_at, :updated_at
 
+  belongs_to :user
   belongs_to :category
   belongs_to :supervisor
   has_many :tags

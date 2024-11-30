@@ -1,0 +1,14 @@
+selenium
+webdriver-manager
+beautifulsoup4
+requests
+nltk
+gensim
+scikit-learn
+langdetect
+textblob
+stop-words
+janome
+stopwordsiso
+transformers
+torch

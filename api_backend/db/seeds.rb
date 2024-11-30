@@ -1,45 +1,56 @@
-# db/seeds.rb
-
 # カテゴリのシードデータ
-categories = [
+categories_data = [
   { name: 'テクノロジー', slug: 'technology' },
   { name: 'ライフスタイル', slug: 'lifestyle' },
   { name: 'ビジネス', slug: 'business' },
-].map do |category_attrs|
-  Category.find_or_create_by!(slug: category_attrs[:slug]) do |category|
-    category.name = category_attrs[:name]
+]
+
+categories = categories_data.map do |attrs|
+  Category.find_or_create_by!(slug: attrs[:slug]) do |category|
+    category.name = attrs[:name]
   end
 end
 
+puts "Categories created: #{categories.map(&:name).join(', ')}"
+
 # 監修者のシードデータ
-supervisors = [
+supervisors_data = [
   { name: '佐藤 太郎' },
   { name: '鈴木 次郎' },
-].map do |supervisor_attrs|
-  Supervisor.find_or_create_by!(name: supervisor_attrs[:name])
+]
+
+supervisors = supervisors_data.map do |attrs|
+  Supervisor.find_or_create_by!(name: attrs[:name])
 end
 
-# ユーザーのシードデータ（管理者）
+puts "Supervisors created: #{supervisors.map(&:name).join(', ')}"
+
+# ユーザーのシードデータ
 admin_user = User.find_or_create_by!(email: 'admin@example.com') do |user|
   user.password = 'password'
   user.role = :admin
 end
 
-# 一般ユーザーのシードデータ
 regular_user = User.find_or_create_by!(email: 'user@example.com') do |user|
   user.password = 'password'
   user.role = :user
 end
 
+puts "Users created: Admin - #{admin_user.email}, Regular - #{regular_user.email}"
+
 # タグのシードデータ
-tags = [
+tags_data = [
   { name: 'Ruby' },
   { name: 'Rails' },
   { name: 'JavaScript' },
   { name: 'Next.js' },
-].map do |tag_attrs|
-  Tag.find_or_create_by!(name: tag_attrs[:name])
+]
+
+tags = tags_data.map do |attrs|
+  Tag.find_or_create_by!(name: attrs[:name])
 end
+
+puts "Tags created: #{tags.map(&:name).join(', ')}"
 
 # 記事のシードデータ
 articles_data = [
@@ -47,38 +58,44 @@ articles_data = [
     title: 'Ruby on Railsの基礎',
     content: 'Ruby on Railsの基本的な使い方について解説します。',
     slug: 'ruby-on-rails-basics',
-    category: categories[0],
-    supervisor: supervisors[0],
+    category: categories.find { |c| c.slug == 'technology' },
+    supervisor: supervisors.first,
     user: admin_user,
-    tags: [tags[0], tags[1]]
+    tags: tags.select { |t| ['Ruby', 'Rails'].include?(t.name) },
+    status: 'published'
   },
   {
     title: 'Next.jsでのSSRの実装',
     content: 'Next.jsを使用したサーバーサイドレンダリングの方法を紹介します。',
     slug: 'nextjs-ssr-implementation',
-    category: categories[0],
-    supervisor: supervisors[1],
+    category: categories.find { |c| c.slug == 'technology' },
+    supervisor: supervisors.last,
     user: regular_user,
-    tags: [tags[2], tags[3]]
+    tags: tags.select { |t| ['JavaScript', 'Next.js'].include?(t.name) },
+    status: 'published'
   },
   {
     title: 'ビジネス戦略の立て方',
     content: '効果的なビジネス戦略の立て方について詳しく解説します。',
     slug: 'business-strategy-development',
-    category: categories[2],
-    supervisor: supervisors[0],
+    category: categories.find { |c| c.slug == 'business' },
+    supervisor: supervisors.first,
     user: admin_user,
-    tags: [tags[1], tags[2]]
+    tags: tags.select { |t| ['Rails', 'JavaScript'].include?(t.name) },
+    status: 'draft'
   },
 ]
 
-articles_data.each do |article_attrs|
-  Article.find_or_create_by!(slug: article_attrs[:slug]) do |article|
-    article.title = article_attrs[:title]
-    article.content = article_attrs[:content]
-    article.category = article_attrs[:category]
-    article.supervisor = article_attrs[:supervisor]
-    article.user = article_attrs[:user]
-    article.tags = article_attrs[:tags]
+articles = articles_data.map do |attrs|
+  Article.find_or_create_by!(slug: attrs[:slug]) do |article|
+    article.title = attrs[:title]
+    article.content = attrs[:content]
+    article.category = attrs[:category]
+    article.supervisor = attrs[:supervisor]
+    article.user = attrs[:user]
+    article.tags = attrs[:tags]
+    article.status = attrs[:status]
   end
 end
+
+puts "Articles created: #{articles.map(&:title).join(', ')}"

@@ -16,6 +16,7 @@ const ArticleForm = () => {
     const [supervisors, setSupervisors] = useState([]); // 追加
     const [tags, setTags] = useState([]);
     const [selectedTagIds, setSelectedTagIds] = useState([]);
+    const [status, setStatus] = useState("draft"); // 追加
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -104,6 +105,7 @@ const ArticleForm = () => {
         setCategoryId(data.category ? data.category.id : "");
         setSupervisorId(data.supervisor ? data.supervisor.id : ""); // 追加
         setSelectedTagIds(data.tags.map((tag) => tag.id));
+        setStatus(data.status || "draft"); // 追加
         } catch (err) {
         setError(err.message);
         }
@@ -127,12 +129,15 @@ const ArticleForm = () => {
                 supervisor_id: supervisorId || null, // 監修者が未選択の場合は null
                 tag_ids: selectedTagIds,
                 slug: slugify(title),
+                status, // 追加
             },
             }),
         });
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.errors || "記事の保存に失敗しました");
+            throw new Error(
+            errorData.errors.join(", ") || "記事の保存に失敗しました"
+            );
         }
         // 成功したらリダイレクト
         navigate("/articles");
@@ -237,6 +242,18 @@ const ArticleForm = () => {
                 </label>
                 ))}
             </div>
+            </div>
+            <div>
+            <label className="block text-gray-700">ステータス:</label>{" "}
+            {/* 追加 */}
+            <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            >
+                <option value="draft">下書き</option>
+                <option value="published">公開</option>
+            </select>
             </div>
             <div className="flex space-x-4">
             <button

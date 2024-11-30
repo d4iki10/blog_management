@@ -76,11 +76,11 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem("token");
         const headers = options.headers || {};
         if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+            headers["Authorization"] = `Bearer ${token}`;
         }
         return fetch(`${process.env.REACT_APP_API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers,
+            ...options,
+            headers,
         });
     };
 
