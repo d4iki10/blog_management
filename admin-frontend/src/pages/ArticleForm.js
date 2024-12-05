@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -9,32 +9,23 @@ const ArticleForm = () => {
     const { apiRequest } = useAuth();
 
     const [title, setTitle] = useState("");
+    const [slugInput, setSlugInput] = useState("");
     const [content, setContent] = useState("");
     const [categoryId, setCategoryId] = useState("");
-    const [supervisorId, setSupervisorId] = useState(""); // 追加
+    const [supervisorId, setSupervisorId] = useState("");
     const [categories, setCategories] = useState([]);
-    const [supervisors, setSupervisors] = useState([]); // 追加
+    const [supervisors, setSupervisors] = useState([]);
     const [tags, setTags] = useState([]);
     const [selectedTagIds, setSelectedTagIds] = useState([]);
-    const [status, setStatus] = useState("draft"); // 追加
+    const [status, setStatus] = useState("draft");
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        fetchCategories();
-        fetchSupervisors(); // 追加
-        fetchTags();
-        if (isEditing) {
-        fetchArticle();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [apiRequest, slug, isEditing]);
-
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         try {
         const response = await apiRequest("/categories", {
             method: "GET",
             headers: {
-            "Content-Type": "application/json",
+                "Content-Type": "application/json",
             },
         });
         if (!response.ok) {
@@ -44,17 +35,16 @@ const ArticleForm = () => {
         const data = await response.json();
         setCategories(data);
         } catch (err) {
-        setError(err.message);
+            setError(err.message);
         }
-    };
+    }, [apiRequest]);
 
-    const fetchSupervisors = async () => {
-        // 追加
+    const fetchSupervisors = useCallback(async () => {
         try {
         const response = await apiRequest("/supervisors", {
             method: "GET",
             headers: {
-            "Content-Type": "application/json",
+                "Content-Type": "application/json",
             },
         });
         if (!response.ok) {
@@ -64,11 +54,11 @@ const ArticleForm = () => {
         const data = await response.json();
         setSupervisors(data);
         } catch (err) {
-        setError(err.message);
+            setError(err.message);
         }
-    };
+    }, [apiRequest]);
 
-    const fetchTags = async () => {
+    const fetchTags = useCallback(async () => {
         try {
         const response = await apiRequest("/tags", {
             method: "GET",
@@ -85,58 +75,86 @@ const ArticleForm = () => {
         } catch (err) {
         setError(err.message);
         }
-    };
+    }, [apiRequest]);
 
-    const fetchArticle = async () => {
+    const fetchArticle = useCallback(async () => {
         try {
-        const response = await apiRequest(`/articles/${slug}`, {
-            method: "GET",
-            headers: {
-            "Content-Type": "application/json",
-            },
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.errors || "記事の取得に失敗しました");
-        }
-        const data = await response.json();
-        setTitle(data.title);
-        setContent(data.content);
-        setCategoryId(data.category ? data.category.id : "");
-        setSupervisorId(data.supervisor ? data.supervisor.id : ""); // 追加
-        setSelectedTagIds(data.tags.map((tag) => tag.id));
-        setStatus(data.status || "draft"); // 追加
+            const response = await apiRequest(`/articles/${slug}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.errors || "記事の取得に失敗しました");
+            }
+            const data = await response.json();
+            setTitle(data.title);
+            setSlugInput(data.slug || "");
+            setContent(data.content);
+            setCategoryId(data.category ? data.category.id : "");
+            setSupervisorId(data.supervisor ? data.supervisor.id : "");
+            setSelectedTagIds(data.tags.map((tag) => tag.id));
+            setStatus(data.status || "draft");
         } catch (err) {
-        setError(err.message);
+            setError(err.message);
         }
-    };
+    }, [apiRequest, slug]);
+
+    useEffect(() => {
+        fetchCategories();
+        fetchSupervisors();
+        fetchTags();
+        if (isEditing) {
+            fetchArticle();
+            // 5秒後にもう一度記事を再取得する
+            const timerId = setTimeout(() => {
+                fetchArticle();
+            }, 5000);
+            return () => clearTimeout(timerId);
+        }
+    }, [fetchCategories, fetchSupervisors, fetchTags, fetchArticle, isEditing]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
         const method = isEditing ? "PUT" : "POST";
         const endpoint = isEditing ? `/articles/${slug}` : "/articles";
+
+        // 作成時と編集時で送信するデータを分ける
+        const articleData = {
+            title,
+            slug: slugInput,
+            content,
+            status,
+            category_id: categoryId || null,
+            supervisor_id: supervisorId || null,
+            tag_ids: selectedTagIds,
+        };
+
+        // 編集時のみ content と status を含める
+        if (isEditing) {
+            articleData.content = content;
+            articleData.status = status;
+        }
+
         const response = await apiRequest(endpoint, {
             method,
             headers: {
             "Content-Type": "application/json",
             },
             body: JSON.stringify({
-            article: {
-                title,
-                content,
-                category_id: categoryId || null, // カテゴリが未選択の場合は null
-                supervisor_id: supervisorId || null, // 監修者が未選択の場合は null
-                tag_ids: selectedTagIds,
-                slug: slugify(title),
-                status, // 追加
-            },
+            article: articleData,
             }),
         });
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(
-            errorData.errors.join(", ") || "記事の保存に失敗しました"
+            // errorData.errors.join(", ") || "記事の保存に失敗しました"
+            errorData.error && Array.isArray(errorData.error)
+                ? errorData.error.join(", ")
+                : errorData.error || "記事の保存に失敗しました"
             );
         }
         // 成功したらリダイレクト
@@ -165,112 +183,123 @@ const ArticleForm = () => {
 
     return (
         <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md">
-        <h2 className="text-2xl font-semibold mb-4">
+            <h2 className="text-2xl font-semibold mb-4">
             {isEditing ? "記事編集" : "記事作成"}
-        </h2>
-        {error && (
+            </h2>
+            {error && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">
-            {error}
+                {error}
             </div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+            )}
+            <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-            <label className="block text-gray-700">タイトル:</label>
-            <input
+                <label className="block text-gray-700">タイトル:</label>
+                <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                 placeholder="記事のタイトルを入力"
-            />
+                />
             </div>
             <div>
-            <label className="block text-gray-700">内容:</label>
-            <textarea
+                <label className="block text-gray-700">スラッグ:</label>
+                <input
+                type="text"
+                value={slugInput}
+                onChange={(e) => setSlugInput(e.target.value)}
+                required
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="記事のスラッグを入力"
+                />
+            </div>
+            <div>
+                <label className="block text-gray-700">内容:</label>
+                <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 required
                 rows="6"
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                 placeholder="記事の内容を入力"
-            ></textarea>
+                ></textarea>
             </div>
             <div>
-            <label className="block text-gray-700">カテゴリー:</label>
-            <select
+                <label className="block text-gray-700">カテゴリー:</label>
+                <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            >
+                >
                 <option value="">選択しない</option>
                 {categories.map((category) => (
-                <option key={category.id} value={category.id}>
+                    <option key={category.id} value={category.id}>
                     {category.name}
-                </option>
+                    </option>
                 ))}
-            </select>
+                </select>
             </div>
             <div>
-            <label className="block text-gray-700">監修者:</label> {/* 追加 */}
-            <select
+                <label className="block text-gray-700">監修者:</label> {/* 追加 */}
+                <select
                 value={supervisorId}
                 onChange={(e) => setSupervisorId(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            >
+                >
                 <option value="">選択しない</option>
                 {supervisors.map((sup) => (
-                <option key={sup.id} value={sup.id}>
+                    <option key={sup.id} value={sup.id}>
                     {sup.name}
-                </option>
+                    </option>
                 ))}
-            </select>
+                </select>
             </div>
             <div>
-            <label className="block text-gray-700 mb-2">タグ:</label>
-            <div className="flex flex-wrap gap-2">
+                <label className="block text-gray-700 mb-2">タグ:</label>
+                <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                <label key={tag.id} className="inline-flex items-center">
+                    <label key={tag.id} className="inline-flex items-center">
                     <input
-                    type="checkbox"
-                    value={tag.id}
-                    checked={selectedTagIds.includes(tag.id)}
-                    onChange={handleTagChange}
-                    className="form-checkbox h-5 w-5 text-blue-600"
+                        type="checkbox"
+                        value={tag.id}
+                        checked={selectedTagIds.includes(tag.id)}
+                        onChange={handleTagChange}
+                        className="form-checkbox h-5 w-5 text-blue-600"
                     />
                     <span className="ml-2 text-gray-700">{tag.name}</span>
-                </label>
+                    </label>
                 ))}
-            </div>
+                </div>
             </div>
             <div>
-            <label className="block text-gray-700">ステータス:</label>{" "}
-            {/* 追加 */}
-            <select
+                <label className="block text-gray-700">ステータス:</label>{" "}
+                {/* 追加 */}
+                <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            >
+                >
                 <option value="draft">下書き</option>
                 <option value="published">公開</option>
-            </select>
+                </select>
             </div>
             <div className="flex space-x-4">
-            <button
+                <button
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
-            >
+                >
                 {isEditing ? "更新" : "作成"}
-            </button>
-            <button
+                </button>
+                <button
                 type="button"
                 onClick={() => navigate("/articles")}
                 className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none"
-            >
+                >
                 キャンセル
-            </button>
+                </button>
             </div>
-        </form>
+            </form>
         </div>
     );
 };

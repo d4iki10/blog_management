@@ -32,9 +32,9 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem("token");
         }
         } catch (error) {
-        console.error("ユーザー情報の取得に失敗しました:", error);
-        setCurrentUser(null);
-        localStorage.removeItem("token");
+            console.error("ユーザー情報の取得に失敗しました:", error);
+            setCurrentUser(null);
+            localStorage.removeItem("token");
         }
     };
 
@@ -44,11 +44,11 @@ export const AuthProvider = ({ children }) => {
         const response = await fetch(
             `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
             {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
             }
         );
         if (!response.ok) {
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("token", data.token); // トークンを保存
         navigate("/dashboard");
         } catch (error) {
-        throw error;
+            throw error;
         }
     };
 
@@ -78,7 +78,10 @@ export const AuthProvider = ({ children }) => {
         if (token) {
             headers["Authorization"] = `Bearer ${token}`;
         }
-        return fetch(`${process.env.REACT_APP_API_BASE_URL}${endpoint}`, {
+        const url = `${process.env.REACT_APP_API_BASE_URL}${endpoint}`;
+        console.log(`API Request URL: ${url}`); // 追加
+        console.log(`Authorization Header: ${headers["Authorization"]}`); // 追加
+        return fetch(url, {
             ...options,
             headers,
         });
@@ -88,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (token) {
-        fetchUser(token);
+            fetchUser(token);
         }
     }, []);
 
