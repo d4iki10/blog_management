@@ -7,6 +7,8 @@ from textblob import TextBlob
 from janome.tokenizer import Tokenizer
 from gensim.models import Word2Vec
 from stopwordsiso import stopwords
+from bs4 import BeautifulSoup
+import requests
 
 nltk.download('punkt')
 nltk.download('stopwords')

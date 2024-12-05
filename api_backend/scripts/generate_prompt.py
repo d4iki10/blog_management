@@ -4,6 +4,7 @@ import json
 def generate_prompt(analysis_results):
     prompt = f"""
 以下の分析結果に基づいて、「{analysis_results['target_keyword']}」に関するSEO上位表示を狙う記事を作成してください。
+出力結果は記事本文のみでMarkdown形式で出力してください。
 
 **分析結果**
 1. ターゲットキーワード：{analysis_results['target_keyword']}
@@ -43,6 +44,8 @@ Webエンジニア歴5年以上。現在は、プログラミングスクール�
 12. 公式ドキュメントの最新の情報を参照する。
 13. 必要な場合は参照元として外部リンクを追加する。
 14. あなたが書いた記事は生成AIが書いたコンテンツの判定を受けやすいので、人間のライターが書いた自然な表現になるように細心の注意を払う。
+
+---ARTICLE_START---
 """
     return prompt
 

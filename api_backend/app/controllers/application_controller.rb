@@ -1,8 +1,6 @@
 class ApplicationController < ActionController::API
   require 'jwt'
 
-  before_action :authorize_request
-
   private
 
   def authorize_request
@@ -15,6 +13,22 @@ class ApplicationController < ActionController::API
       render json: { errors: 'ユーザーが見つかりません' }, status: :unauthorized
     rescue JWT::DecodeError => e
       render json: { errors: '無効なトークンです' }, status: :unauthorized
+    end
+  end
+
+  # optional_authorize_request を定義
+  def optional_authorize_request
+    header = request.headers['Authorization']
+    if header
+      header = header.split(' ').last
+      begin
+        @decoded = jwt_decode(header)
+        @current_user = User.find(@decoded[:user_id])
+      rescue ActiveRecord::RecordNotFound, JWT::DecodeError
+        @current_user = nil
+      end
+    else
+      @current_user = nil
     end
   end
 

@@ -10,8 +10,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import requests
 
 def get_search_results(keyword, num_pages=5):
     options = Options()
@@ -78,7 +76,7 @@ def main():
         sys.exit(1)
 
     keyword = sys.argv[1]
-    print(keyword)
+    # print(keyword)
     results = get_search_results(keyword)
     print(json.dumps(results, ensure_ascii=False))
 

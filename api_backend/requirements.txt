@@ -12,3 +12,8 @@ janome
 stopwordsiso
 transformers
 torch
+openai
+python-dotenv
+protobuf
+tiktoken
+sentencepiece

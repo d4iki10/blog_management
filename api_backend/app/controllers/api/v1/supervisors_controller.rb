@@ -1,5 +1,5 @@
 class Api::V1::SupervisorsController < ApplicationController
-  before_action :authorize_request
+  before_action :authorize_request, only: [:create, :update, :destroy]
   before_action :set_supervisor, only: [:show, :update, :destroy]
 
   # GET /api/v1/supervisors
