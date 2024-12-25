@@ -14,6 +14,11 @@ Rails.application.routes.draw do
       resources :categories, param: :slug
       resources :tags
       resources :supervisors
+      resources :media do
+        collection do
+          post 'upload'
+        end
+      end
     end
   end
 end

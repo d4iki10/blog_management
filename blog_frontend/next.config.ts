@@ -8,6 +8,15 @@ const nextConfig = {
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost", // IPv4/IPv6どちらでもlocalhost扱いになる
+        // ↑ ActiveStorageのURLパターンに合うようにワイルドカードを設定
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

@@ -12,33 +12,23 @@ interface Article {
 }
 
 const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
-    console.log("ArticleCard:", article);
     return (
-        <div style={cardStyle}>
-        <h2>
-            <Link
-            href={`/${article.category.slug}/${article.slug}`}
-            style={titleStyle}
-            >
+        <div className="bg-white p-6 mb-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+        {/* 記事タイトル */}
+        <h2 className="text-xl font-semibold mb-2 text-gray-800 hover:text-blue-500 transition duration-200">
+            <Link href={`/${article.category.slug}/${article.slug}`}>
             {article.title}
             </Link>
         </h2>
-        <p>カテゴリ: {article.category.name}</p>
+        {/* カテゴリ */}
+        <p className="text-sm text-gray-600">
+            カテゴリ:{" "}
+            <Link href={`/${article.category.slug}`} className="text-blue-500 hover:underline">
+                {article.category.name}
+            </Link>
+        </p>
         </div>
     );
-};
-
-const cardStyle: React.CSSProperties = {
-    backgroundColor: "#fff",
-    padding: "1rem",
-    margin: "1rem 0",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-};
-
-const titleStyle: React.CSSProperties = {
-    color: "#333",
-    textDecoration: "none",
 };
 
 export default ArticleCard;

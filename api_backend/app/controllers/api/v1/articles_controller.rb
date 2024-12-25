@@ -92,11 +92,33 @@ class Api::V1::ArticlesController < ApplicationController
   end
 
   def article_params
-    params.require(:article).permit(:title, :slug, :category_id, :supervisor_id, :topic, :content, tag_ids: [])
+    params.require(:article).permit(
+      :title,
+      :slug,
+      :category_id,
+      :supervisor_id,
+      :topic,
+      :content,
+      :meta_title,          # 追加
+      :meta_description,    # 追加
+      :featured_image_url,  # 追加
+      tag_ids: []
+    )
   end
 
   def article_update_params
-    params.require(:article).permit(:title, :slug, :category_id, :supervisor_id, :status, :content, tag_ids: [])
+    params.require(:article).permit(
+      :title,
+      :slug,
+      :category_id,
+      :supervisor_id,
+      :status,
+      :content,
+      :meta_title,          # 追加
+      :meta_description,    # 追加
+      :featured_image_url,  # 追加
+      tag_ids: []
+    )
   end
 
   def slugify(text)

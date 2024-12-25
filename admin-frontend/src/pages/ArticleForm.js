@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import MarkdownEditor from "../components/MarkdownEditor"; // 追加
+import Media from "../components/Media"; // 追加
 
 const ArticleForm = () => {
     const { slug } = useParams();
@@ -18,14 +20,18 @@ const ArticleForm = () => {
     const [tags, setTags] = useState([]);
     const [selectedTagIds, setSelectedTagIds] = useState([]);
     const [status, setStatus] = useState("draft");
+    const [metaTitle, setMetaTitle] = useState("");
+    const [metaDescription, setMetaDescription] = useState("");
+    const [featuredImageUrl, setFeaturedImageUrl] = useState(""); // アイキャッチ画像URL
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false); // loadingステートを追加
 
     const fetchCategories = useCallback(async () => {
         try {
         const response = await apiRequest("/categories", {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
+            "Content-Type": "application/json",
             },
         });
         if (!response.ok) {
@@ -35,7 +41,7 @@ const ArticleForm = () => {
         const data = await response.json();
         setCategories(data);
         } catch (err) {
-            setError(err.message);
+        setError(err.message);
         }
     }, [apiRequest]);
 
@@ -44,7 +50,7 @@ const ArticleForm = () => {
         const response = await apiRequest("/supervisors", {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
+            "Content-Type": "application/json",
             },
         });
         if (!response.ok) {
@@ -54,7 +60,7 @@ const ArticleForm = () => {
         const data = await response.json();
         setSupervisors(data);
         } catch (err) {
-            setError(err.message);
+        setError(err.message);
         }
     }, [apiRequest]);
 
@@ -79,26 +85,32 @@ const ArticleForm = () => {
 
     const fetchArticle = useCallback(async () => {
         try {
-            const response = await apiRequest(`/articles/${slug}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.errors || "記事の取得に失敗しました");
-            }
-            const data = await response.json();
-            setTitle(data.title);
-            setSlugInput(data.slug || "");
-            setContent(data.content);
-            setCategoryId(data.category ? data.category.id : "");
-            setSupervisorId(data.supervisor ? data.supervisor.id : "");
-            setSelectedTagIds(data.tags.map((tag) => tag.id));
-            setStatus(data.status || "draft");
+        const response = await apiRequest(`/articles/${slug}`, {
+            method: "GET",
+            headers: {
+            "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.errors || "記事の取得に失敗しました");
+        }
+        const data = await response.json();
+        setTitle(data.title);
+        setSlugInput(data.slug || "");
+        setContent(data.content);
+        setCategoryId(data.category ? data.category.id : "");
+        setSupervisorId(data.supervisor ? data.supervisor.id : "");
+        setSelectedTagIds(data.tags.map((tag) => tag.id));
+        setStatus(data.status || "draft");
+        setMetaTitle(data.meta_title || data.title); // Meta Titleを設定
+        setMetaDescription(
+            data.meta_description ||
+            (data.content ? data.content.split("\n")[0].slice(0, 160) : "")
+        ); // Meta Descriptionを設定（序文の最初の行を使用）
+        setFeaturedImageUrl(data.featured_image_url || ""); // アイキャッチ画像のURLを設定
         } catch (err) {
-            setError(err.message);
+        setError(err.message);
         }
     }, [apiRequest, slug]);
 
@@ -107,17 +119,20 @@ const ArticleForm = () => {
         fetchSupervisors();
         fetchTags();
         if (isEditing) {
+        fetchArticle();
+        // 5秒後にもう一度記事を再取得する
+        const timerId = setTimeout(() => {
             fetchArticle();
-            // 5秒後にもう一度記事を再取得する
-            const timerId = setTimeout(() => {
-                fetchArticle();
-            }, 5000);
-            return () => clearTimeout(timerId);
+        }, 5000);
+        return () => clearTimeout(timerId);
         }
     }, [fetchCategories, fetchSupervisors, fetchTags, fetchArticle, isEditing]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true); // ローディング開始
+        setError("");
+
         try {
         const method = isEditing ? "PUT" : "POST";
         const endpoint = isEditing ? `/articles/${slug}` : "/articles";
@@ -131,13 +146,10 @@ const ArticleForm = () => {
             category_id: categoryId || null,
             supervisor_id: supervisorId || null,
             tag_ids: selectedTagIds,
+            meta_title: metaTitle,
+            meta_description: metaDescription,
+            featured_image_url: featuredImageUrl, // アイキャッチ画像のURLを送信
         };
-
-        // 編集時のみ content と status を含める
-        if (isEditing) {
-            articleData.content = content;
-            articleData.status = status;
-        }
 
         const response = await apiRequest(endpoint, {
             method,
@@ -151,7 +163,6 @@ const ArticleForm = () => {
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(
-            // errorData.errors.join(", ") || "記事の保存に失敗しました"
             errorData.error && Array.isArray(errorData.error)
                 ? errorData.error.join(", ")
                 : errorData.error || "記事の保存に失敗しました"
@@ -161,6 +172,8 @@ const ArticleForm = () => {
         navigate("/articles");
         } catch (err) {
         setError(err.message);
+        } finally {
+        setLoading(false); // ローディング終了
         }
     };
 
@@ -171,6 +184,16 @@ const ArticleForm = () => {
         } else {
         setSelectedTagIds(selectedTagIds.filter((tagId) => tagId !== id));
         }
+    };
+
+    const handleImageSelect = (image) => {
+        // アイキャッチ画像として設定
+        setFeaturedImageUrl(image.url);
+    };
+
+    const handleImageInsert = (url) => {
+        // 記事内容に画像を挿入（Markdown形式）
+        setContent((prevContent) => `${prevContent}\n\n![image](${url})\n\n`);
     };
 
     const slugify = (text) => {
@@ -215,15 +238,8 @@ const ArticleForm = () => {
                 />
             </div>
             <div>
-                <label className="block text-gray-700">内容:</label>
-                <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                rows="6"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                placeholder="記事の内容を入力"
-                ></textarea>
+                <label className="block text-gray-700">内容 (Markdown):</label>
+                <MarkdownEditor value={content} onChange={setContent} />
             </div>
             <div>
                 <label className="block text-gray-700">カテゴリー:</label>
@@ -284,12 +300,50 @@ const ArticleForm = () => {
                 <option value="published">公開</option>
                 </select>
             </div>
+            {/* アイキャッチ画像の追加 */}
+            <Media
+                onImageSelect={handleImageSelect}
+                onImageInsert={handleImageInsert}
+            />
+            {featuredImageUrl && (
+                <div className="mb-4">
+                <img
+                    src={featuredImageUrl}
+                    alt="アイキャッチ画像"
+                    className="w-full h-auto rounded"
+                />
+                </div>
+            )}
+            {/* SEOメタデータの追加 */}
+            <div>
+                <label className="block text-gray-700">Meta Title:</label>
+                <input
+                type="text"
+                value={metaTitle}
+                onChange={(e) => setMetaTitle(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="Meta Titleを入力"
+                />
+            </div>
+            <div>
+                <label className="block text-gray-700">Meta Description:</label>
+                <textarea
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                rows="3"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="Meta Descriptionを入力（160文字以内）"
+                ></textarea>
+            </div>
             <div className="flex space-x-4">
                 <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+                disabled={loading}
+                className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 >
-                {isEditing ? "更新" : "作成"}
+                {loading ? "保存中..." : isEditing ? "更新" : "作成"}
                 </button>
                 <button
                 type="button"

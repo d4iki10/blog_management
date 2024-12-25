@@ -3,40 +3,29 @@ import Link from "next/link";
 
 const Navbar: React.FC = () => {
     return (
-        <nav style={navStyle}>
-        <ul style={ulStyle}>
-            <li>
-            <Link href="/" style={linkStyle}>
-                ホーム
-            </Link>
-            </li>
-            <li>
-            <Link href="/articles" style={linkStyle}>
-                記事一覧
-            </Link>
-            </li>
-            {/* 他のナビゲーションリンクを追加可能 */}
-        </ul>
+        <nav className="bg-gray-900 text-white p-4 shadow-lg">
+            <div className="container mx-auto flex items-center justify-between">
+                {/* 左端のアイコン */}
+                <div className="flex items-center space-x-2">
+                <span className="text-lg font-semibold">My Blog</span>
+                </div>
+
+                {/* 右端のリンク */}
+                <ul className="flex space-x-6">
+                <li>
+                    <Link href="/" className="text-white hover:text-gray-400 transition duration-200">
+                        ホーム
+                    </Link>
+                </li>
+                <li>
+                    <Link href="/articles" className="text-white hover:text-gray-400 transition duration-200">
+                        記事一覧
+                    </Link>
+                </li>
+                </ul>
+            </div>
         </nav>
     );
-};
-
-const navStyle: React.CSSProperties = {
-    backgroundColor: "#333",
-    padding: "1rem",
-};
-
-const ulStyle: React.CSSProperties = {
-    listStyle: "none",
-    display: "flex",
-    gap: "1rem",
-    margin: 0,
-    padding: 0,
-};
-
-const linkStyle: React.CSSProperties = {
-    color: "#fff",
-    textDecoration: "none",
 };
 
 export default Navbar;

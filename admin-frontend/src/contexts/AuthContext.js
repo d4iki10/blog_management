@@ -1,3 +1,4 @@
+// admin-frontend/src/contexts/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +10,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem("token")); // トークンを状態として管理
     const navigate = useNavigate();
 
     // ユーザー情報を取得する関数
@@ -30,11 +32,13 @@ export const AuthProvider = ({ children }) => {
         } else {
             setCurrentUser(null);
             localStorage.removeItem("token");
+            setToken(null);
         }
         } catch (error) {
-            console.error("ユーザー情報の取得に失敗しました:", error);
-            setCurrentUser(null);
-            localStorage.removeItem("token");
+        console.error("ユーザー情報の取得に失敗しました:", error);
+        setCurrentUser(null);
+        localStorage.removeItem("token");
+        setToken(null);
         }
     };
 
@@ -44,11 +48,11 @@ export const AuthProvider = ({ children }) => {
         const response = await fetch(
             `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
             {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password }),
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
             }
         );
         if (!response.ok) {
@@ -58,9 +62,10 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         setCurrentUser(data.user);
         localStorage.setItem("token", data.token); // トークンを保存
+        setToken(data.token); // トークン状態を更新
         navigate("/dashboard");
         } catch (error) {
-            throw error;
+        throw error;
         }
     };
 
@@ -68,35 +73,38 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         setCurrentUser(null);
         localStorage.removeItem("token");
+        setToken(null);
         navigate("/login");
     };
 
     // APIリクエスト用のヘルパー関数
     const apiRequest = async (endpoint, options = {}) => {
-        const token = localStorage.getItem("token");
+        const storedToken = localStorage.getItem("token");
         const headers = options.headers || {};
-        if (token) {
-            headers["Authorization"] = `Bearer ${token}`;
+        if (storedToken) {
+        headers["Authorization"] = `Bearer ${storedToken}`;
         }
         const url = `${process.env.REACT_APP_API_BASE_URL}${endpoint}`;
         console.log(`API Request URL: ${url}`); // 追加
         console.log(`Authorization Header: ${headers["Authorization"]}`); // 追加
         return fetch(url, {
-            ...options,
-            headers,
+        ...options,
+        headers,
         });
     };
 
     // コンポーネントのマウント時にユーザー情報を取得
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            fetchUser(token);
+        const storedToken = localStorage.getItem("token");
+        if (storedToken) {
+        fetchUser(storedToken);
         }
     }, []);
 
     return (
-        <AuthContext.Provider value={{ currentUser, login, logout, apiRequest }}>
+        <AuthContext.Provider
+        value={{ currentUser, token, login, logout, apiRequest }}
+        >
         {children}
         </AuthContext.Provider>
     );

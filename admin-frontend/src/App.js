@@ -16,6 +16,7 @@ import Users from "./pages/Users";
 import Supervisors from "./pages/Supervisors";
 import Tags from "./pages/Tags";
 import MenuBar from "./components/MenuBar";
+import Media from "./components/Media";
 
 const App = () => {
   return (
@@ -54,6 +55,7 @@ const AppRoutes = () => {
               {/* 追加 */}
               <Route path="/tags" element={<Tags />} /> {/* 追加 */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/media" element={<Media />} />
             </Routes>
           </div>
         </div>

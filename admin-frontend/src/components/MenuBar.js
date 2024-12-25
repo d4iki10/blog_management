@@ -11,6 +11,7 @@ const MenuBar = () => {
         { name: "記事管理", path: "/articles" },
         { name: "カテゴリー管理", path: "/categories" },
         { name: "タグ管理", path: "/tags" },
+        { name: "画像管理", path: "/media" },
     ];
 
     // 管理者のみ表示するメニュー項目
@@ -20,7 +21,7 @@ const MenuBar = () => {
     ];
 
     return (
-        <aside className="w-64 bg-blue-600 text-white min-h-screen fixed">
+        <aside className="w-64 bg-blue-500 text-white min-h-screen fixed">
         {/* ロゴまたはタイトル */}
         <div className="flex items-center justify-center h-16 border-b border-blue-700">
             <Link to="/dashboard" className="text-2xl font-bold">
@@ -62,7 +63,7 @@ const MenuBar = () => {
         <div className="absolute bottom-0 w-full mb-4">
             <button
             onClick={logout}
-            className="flex items-center w-full py-2 px-8 bg-red-600 hover:bg-red-700 focus:outline-none"
+            className="flex items-center w-full py-2 px-8 bg-red-500 hover:bg-red-700 focus:outline-none"
             >
             ログアウト
             </button>
