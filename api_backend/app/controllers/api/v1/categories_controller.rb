@@ -4,7 +4,11 @@ class Api::V1::CategoriesController < ApplicationController
 
   # GET /api/v1/categories
   def index
-    @categories = Category.all
+    if params[:slug].present?
+      @categories = Category.where(slug: params[:slug])
+    else
+      @categories = Category.all
+    end
     render json: @categories
   end
 

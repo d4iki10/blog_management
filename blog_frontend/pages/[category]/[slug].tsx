@@ -11,8 +11,8 @@ import { useRouter } from "next/router";
 interface User {
   id: number;
   email: string;
-  name: string; // 著者名を追加
-  profile_image_url?: string; // プロフィール画像URL（オプション）
+  name: string;
+  profile_image_url?: string;
   role: string;
   created_at: string;
   updated_at: string;
@@ -127,7 +127,7 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
           <meta name="twitter:image" content={article.featured_image_url} />
         )}
       </Head>
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
         {/* Breadcrumb Navigation */}
         <nav className="text-sm mb-6" aria-label="Breadcrumb">
           <ol className="flex text-gray-700 space-x-2">
@@ -141,7 +141,7 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
             </li>
             <li>
               <a
-                href={`/${article.category.slug}`}
+                href={`/category/${article.category.slug}`}
                 className="text-blue-600 hover:text-blue-800"
               >
                 {article.category.name}
@@ -168,6 +168,7 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
                 height={600} // 必要に応じて調整
                 className="w-full h-auto rounded"
                 priority
+                sizes="(max-width: 768px) 100vw, 800px"
               />
             </div>
           )}
@@ -179,8 +180,6 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
                 className="w-10 h-10 rounded-full"
               />
             )}
-            <span>著者: {article.user.name}</span>
-            <span>|</span>
             <span>公開日: {formatDate(article.created_at)}</span>
             {article.supervisor && (
               <>
@@ -214,14 +213,12 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
 
         {/* Tags Section */}
         <section className="mt-8">
-          <h3 className="text-xl font-semibold mb-4">タグ:</h3>
+          <h3 className="text-xl font-semibold">タグ:</h3>
           <div className="flex flex-wrap gap-2">
             {article.tags.map((tag) => (
               <a
                 key={tag.id}
-                href={`/${
-                  article.category.slug
-                }/tags/${tag.name.toLowerCase()}`}
+                href={`/tags/${tag.name.toLowerCase()}`}
                 className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition"
               >
                 #{tag.name}

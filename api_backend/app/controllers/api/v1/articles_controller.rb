@@ -8,14 +8,45 @@ class Api::V1::ArticlesController < ApplicationController
 
   # GET /api/v1/articles
   def index
-    if @current_user
-      # 管理者リクエスト: すべての記事を取得
-      articles = Article.includes(:category, :tags, :supervisor, :user).order(created_at: :desc)
-    else
-      # 公開リクエスト: 'published' のみ取得
-      articles = Article.where(status: 'published').includes(:category, :tags, :supervisor, :user).order(created_at: :desc)
+    # 基本クエリの設定
+    articles = if @current_user
+                # 管理者リクエスト: すべての記事を取得
+                Article.includes(:category, :tags, :supervisor, :user).order(created_at: :desc)
+              else
+                # 公開リクエスト: 'published' のみ取得
+                Article.where(status: 'published').includes(:category, :tags, :supervisor, :user).order(created_at: :desc)
+              end
+
+    # カテゴリでフィルタリング（category_id が存在する場合）
+    if params[:category_id].present?
+      articles = articles.where(category_id: params[:category_id])
     end
-    render json: articles, status: :ok
+
+    # タグでフィルタリング（tag_id が存在する場合）
+    if params[:tag_id].present?
+      articles = articles.joins(:article_tags).where(article_tags: { tag_id: params[:tag_id] }).distinct
+    end
+
+    # ページネーションの設定（kaminari を使用している場合）
+    page = params[:page].present? ? params[:page].to_i : 1
+    per_page = params[:per_page].present? ? params[:per_page].to_i : 10
+    articles = articles.page(page).per(per_page)
+
+    if @current_user
+      # 管理者向け: 記事の配列を直接返す
+      render json: articles.as_json(include: [:category, :tags, :supervisor, :user]), status: :ok
+    else
+      # 公開向け: articles と meta を返す
+      render json: {
+        articles: articles.as_json(include: [:category, :tags, :supervisor, :user]),
+        meta: {
+          current_page: articles.current_page,
+          total_pages: articles.total_pages,
+          per_page: articles.limit_value,
+          total_count: articles.total_count
+        }
+      }, status: :ok
+    end
   end
 
   # GET /api/v1/articles/:slug
@@ -99,9 +130,9 @@ class Api::V1::ArticlesController < ApplicationController
       :supervisor_id,
       :topic,
       :content,
-      :meta_title,          # 追加
-      :meta_description,    # 追加
-      :featured_image_url,  # 追加
+      :meta_title,
+      :meta_description,
+      :featured_image_url,
       tag_ids: []
     )
   end
@@ -114,9 +145,9 @@ class Api::V1::ArticlesController < ApplicationController
       :supervisor_id,
       :status,
       :content,
-      :meta_title,          # 追加
-      :meta_description,    # 追加
-      :featured_image_url,  # 追加
+      :meta_title,
+      :meta_description,
+      :featured_image_url,
       tag_ids: []
     )
   end
