@@ -10,8 +10,9 @@ from stopwordsiso import stopwords
 from bs4 import BeautifulSoup
 import requests
 
-nltk.download('punkt')
-nltk.download('stopwords')
+# ダウンロードメッセージを抑制するために quiet=True を追加
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
 
 jp_stopwords = set(stopwords('ja')) | set([
     'の', 'に', 'は', 'を', 'た', 'が', 'で', 'て', 'と', 'し', 'れ', 'さ',
@@ -24,7 +25,7 @@ tokenizer = Tokenizer()
 def scrape_page_content(url):
     try:
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
         }
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
@@ -37,8 +38,17 @@ def scrape_page_content(url):
             'content': content,
             'headings': headings
         }
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 403:
+            print(f"Error scraping {url}: 403 Forbidden", file=sys.stderr)
+        else:
+            print(f"HTTP error scraping {url}: {e}", file=sys.stderr)
+        return {
+            'content': '',
+            'headings': []
+        }
     except Exception as e:
-        print(f"Error scraping {url}: {e}")
+        print(f"Error scraping {url}: {e}", file=sys.stderr)
         return {
             'content': '',
             'headings': []
@@ -162,12 +172,19 @@ def main():
         print("Error: No data provided.")
         sys.exit(1)
 
-    search_results_json = sys.argv[1]
-    search_results = json.loads(search_results_json)
-    target_keyword = search_results[0]['Keyword'] if search_results else 'default'
+    try:
+        search_results_json = sys.argv[1]
+        search_results = json.loads(search_results_json)
+        target_keyword = search_results[0]['Keyword'] if search_results else 'default'
 
-    analysis_results = analyze_content(search_results, target_keyword)
-    print(json.dumps(analysis_results, ensure_ascii=False))
+        analysis_results = analyze_content(search_results, target_keyword)
+        print(json.dumps(analysis_results, ensure_ascii=False))
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

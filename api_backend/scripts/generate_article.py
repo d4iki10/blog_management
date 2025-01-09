@@ -1,12 +1,15 @@
-# scripts/generate_article.py
 import sys
 import os
 import json
-import openai
-from dotenv import load_dotenv  # dotenvをインポート
-# from transformers import T5Tokenizer, AutoModelForCausalLM
+from dotenv import load_dotenv
+import google.generativeai as genai
+import openai  # OpenAI を保持する場合（必要に応じて）
+import requests  # OpenAI を保持する場合（必要に応じて）
 
-def generate_article(prompt):
+def generate_article_openai(prompt):
+    """
+    OpenAI APIを使用して記事を生成するメソッド。
+    """
     # スクリプトのディレクトリを取得
     script_dir = os.path.dirname(os.path.abspath(__file__))
     # .env ファイルのパスを設定（プロジェクトのルートに配置している場合）
@@ -19,11 +22,8 @@ def generate_article(prompt):
     # 環境変数からAPIキーを取得
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     if not OPENAI_API_KEY:
-        print(json.dumps({"error": "APIキーが設定されていません。"}))
+        print(json.dumps({"error": "OpenAI APIキーが設定されていません。"}))
         sys.exit(1)
-
-    # デバッグ用（セキュリティ上、部分的に表示）
-    # print(json.dumps({"debug": f"APIキー取得成功: {OPENAI_API_KEY[:4]}***"}))
 
     openai.api_key = OPENAI_API_KEY
     try:
@@ -45,47 +45,60 @@ def generate_article(prompt):
         print(f"OpenAI APIエラー: {e}", file=sys.stderr)
         return None
 
-    # # rinna社の日本語GPT-2モデルを使用する場合
-    # try:
-    #     # モデルとトークナイザーの読み込み
-    #     # print("トークナイザーとモデルをロード中...")
-    #     tokenizer = T5Tokenizer.from_pretrained("rinna/japanese-gpt2-medium")
-    #     model = AutoModelForCausalLM.from_pretrained("rinna/japanese-gpt2-medium")
+def generate_article_gemini(prompt):
+    """
+    Gemini APIを使用して記事を生成するメソッド。
+    """
+    # スクリプトのディレクトリを取得
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # .env ファイルのパスを設定（プロジェクトのルートに配置している場合）
+    dotenv_path = os.path.join(script_dir, '..', '.env')
+    # .env ファイルを読み込む
+    if not load_dotenv(dotenv_path):
+        print(json.dumps({"error": f".env ファイルが見つかりませんでした: {dotenv_path}"}))
+        sys.exit(1)
 
-    #     # プロンプトのエンコード
-    #     # print("プロンプトをエンコード中...")
-    #     input_ids = tokenizer.encode(prompt, return_tensors="pt")
+    # 環境変数からGemini APIキーを取得
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+    if not GEMINI_API_KEY:
+        print(json.dumps({"error": "Gemini APIキーが設定されていません。"}))
+        sys.exit(1)
 
-    #     # テキスト生成
-    #     # print("テキストを生成中...")
-    #     output = model.generate(
-    #         input_ids,
-    #         max_length=1000,
-    #         num_return_sequences=1,
-    #         no_repeat_ngram_size=2,
-    #         temperature=0.7,
-    #         do_sample=True,
-    #         top_p=0.9,
-    #         pad_token_id=tokenizer.eos_token_id
-    #     )
+    # Gemini API を設定
+    genai.configure(api_key=GEMINI_API_KEY)
 
-    #     # 生成されたテキストのデコード
-    #     # print("生成されたテキストをデコード中...")
-    #     article_content = tokenizer.decode(output[0], skip_special_tokens=True)
+    # 使用するモデルを設定（例: 'gemini-1.5-flash' または 'gemini-1.5-pro'）
+    model = genai.GenerativeModel('gemini-1.5-flash')  # 必要に応じてモデル名を変更
 
-    #     # デリミタ以降のみ記事本文として抽出
-    #     delimiter = "---ARTICLE_START---"
-    #     if delimiter in article_content:
-    #         article_content = article_content.split(delimiter, 1)[-1].strip()
-    #     else:
-    #         # 万一デリミタが見つからない場合は全体を記事として扱う（fallback）
-    #         article_content = article_content.strip()
+    try:
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"Gemini APIエラー: {e}", file=sys.stderr)
+        return None
 
-    #     # print("記事生成が完了しました。")
-    #     return article_content
-    # except Exception as e:
-    #     print(f"記事生成中にエラーが発生しました: {e}", file=sys.stderr)
-    #     raise e
+def generate_article(prompt):
+    """
+    環境変数に応じてOpenAI APIまたはGemini APIを使用して記事を生成するメソッド。
+    """
+    use_gemini = os.getenv('USE_GEMINI_API', 'false').lower() == 'true'
+
+    if use_gemini:
+        # Gemini APIを使用
+        article = generate_article_gemini(prompt)
+        if article:
+            return article
+        else:
+            print(json.dumps({"error": "Gemini APIによる記事生成に失敗しました。"}))
+            return None
+    else:
+        # OpenAI APIを使用
+        article = generate_article_openai(prompt)
+        if article:
+            return article
+        else:
+            print(json.dumps({"error": "OpenAI APIによる記事生成に失敗しました。"}))
+            return None
 
 def main():
     if len(sys.argv) < 2:

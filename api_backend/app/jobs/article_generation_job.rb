@@ -3,6 +3,7 @@ class ArticleGenerationJob < ApplicationJob
 
   require 'json'
   require 'shellwords'
+  require 'open3'
 
   def perform(article_id, article_input)
     Rails.logger.info "記事自動生成ジョブ開始: article_id=#{article_id}"
@@ -27,7 +28,14 @@ class ArticleGenerationJob < ApplicationJob
     Rails.logger.info "analyze.py が起動しています"
     analyzed_data = run_python_script('scripts/analyze.py', scraped_data)
     Rails.logger.debug "分析データ: #{analyzed_data}"
-    analyzed_json = parse_json(analyzed_data, 'analyze.py')
+    begin
+      analyzed_json = parse_json(analyzed_data, 'analyze.py')
+      Rails.logger.debug "分析データ（parsed）: #{analyzed_json}"
+    rescue JSON::ParserError => e
+      Rails.logger.error "分析データのパースに失敗: #{e.message}"
+      Rails.logger.error "分析スクリプトの出力: #{analyzed_data}"
+      raise e
+    end
 
     # 3. プロンプトの作成
     Rails.logger.info "generate_prompt.py が起動しています"
@@ -61,22 +69,24 @@ class ArticleGenerationJob < ApplicationJob
 
   def run_python_script(script_path, *args)
     absolute_script_path = Rails.root.join(script_path).to_s
-    escaped_args = args.map { |arg| Shellwords.escape(arg.to_s) }
-    # 仮想環境の Python パスを指定
     python_executable = Rails.root.join('venv', 'bin', 'python3').to_s
-    command = [python_executable, absolute_script_path] + escaped_args
+    command = [python_executable, absolute_script_path] + args.map(&:to_s)
 
     Rails.logger.info "起動しているコマンド: #{command.join(' ')}"
-    output = `#{command.join(' ')}`
-    exit_status = $?.exitstatus
 
-    if exit_status != 0
-      Rails.logger.error "Python のスクリプト #{script_path} ステータスに失敗しました #{exit_status}: #{output}"
-      raise "Python script #{script_path} failed"
+    stdout, stderr, status = Open3.capture3(*command)
+
+    if status.success?
+      Rails.logger.info "Python のスクリプト #{script_path} アウトプット: #{stdout}"
+      if stdout.strip.empty?
+        Rails.logger.error "Python スクリプト #{script_path} が空の出力を返しました。"
+        raise "Python script #{script_path} returned empty output."
+      end
+      return stdout.strip
+    else
+      Rails.logger.error "Python のスクリプト #{script_path} エラー: #{stderr}"
+      raise "Python script #{script_path} failed: #{stderr}"
     end
-
-    Rails.logger.info "Python のスクリプト #{script_path} アウトプット: #{output}"
-    output.strip # 余分な空白や改行を削除
   end
 
   def parse_json(json_string, script_name)

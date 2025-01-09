@@ -3,7 +3,11 @@ webdriver-manager
 beautifulsoup4
 requests
 nltk
+regex
+click
+joblib
 gensim
+smart_open
 scikit-learn
 langdetect
 textblob
@@ -17,3 +21,11 @@ python-dotenv
 protobuf
 tiktoken
 sentencepiece
+pandas
+numpy
+scipy
+pytest
+flake8
+matplotlib
+seaborn
+google-generativeai
