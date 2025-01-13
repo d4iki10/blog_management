@@ -14,31 +14,31 @@ const Media = ({ onImageSelect, onImageInsert }) => {
     const fetchMedia = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await fetch("/api/v1/media", {
+        const response = await fetch("/api/v1/media", {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
             },
-            });
-            if (response.ok) {
+        });
+        if (response.ok) {
             const data = await response.json();
             setMediaList(data);
-            } else {
+        } else {
             const errorData = await response.json();
             throw new Error(errorData.error || "メディアの取得に失敗しました。");
-            }
+        }
         } catch (err) {
-            setError(err.message);
+        setError(err.message);
         } finally {
-            setLoading(false);
+        setLoading(false);
         }
     }, [token]);
 
     useEffect(() => {
         if (token) {
-            // トークンがある場合にのみフェッチ
-            fetchMedia();
+        // トークンがある場合にのみフェッチ
+        fetchMedia();
         }
     }, [token, fetchMedia]);
 
@@ -50,8 +50,8 @@ const Media = ({ onImageSelect, onImageInsert }) => {
     // アップロードハンドラ
     const handleUpload = async () => {
         if (!selectedFile) {
-            setError("ファイルを選択してください。");
-            return;
+        setError("ファイルを選択してください。");
+        return;
         }
 
         setUploading(true);
@@ -74,14 +74,13 @@ const Media = ({ onImageSelect, onImageInsert }) => {
         if (response.ok) {
             setMediaList([data, ...mediaList]); // 新しい画像をリストに追加
             setSelectedFile(null);
-            if (onImageSelect) onImageSelect(data); // 親コンポーネントに選択を通知
         } else {
             setError(data.error || "アップロードに失敗しました。");
         }
         } catch (err) {
-            setError("アップロード中にエラーが発生しました。");
+        setError("アップロード中にエラーが発生しました。");
         } finally {
-            setUploading(false);
+        setUploading(false);
         }
     };
 
@@ -106,7 +105,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
             throw new Error(data.error || "削除に失敗しました。");
         }
         } catch (err) {
-            setError(err.message);
+        setError(err.message);
         }
     };
 
@@ -121,8 +120,8 @@ const Media = ({ onImageSelect, onImageInsert }) => {
     };
 
     return (
-        <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">画像管理</h3>
+        <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+            <h2 className="text-2xl font-semibold mb-6">画像管理</h2>
 
             {/* エラーメッセージ */}
             {error && (
@@ -148,7 +147,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
 
             {/* メディア一覧セクション */}
             <div>
-            <h4 className="text-md font-semibold mb-2">既存の画像</h4>
+            <h3 className="text-md font-semibold mb-2">既存の画像:</h3>
             {loading ? (
                 <div>読み込み中...</div>
             ) : mediaList.length === 0 ? (
@@ -172,6 +171,14 @@ const Media = ({ onImageSelect, onImageInsert }) => {
                         </p>
                     </div>
                     <div className="absolute top-2 right-2 flex space-x-1">
+                        <button
+                        type="button"
+                        onClick={() => onImageSelect && onImageSelect(media)}
+                        className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                        title="アイキャッチに追加"
+                        >
+                        追加
+                        </button>
                         <button
                         type="button"
                         onClick={() => handleDetail(media)}
@@ -247,7 +254,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
                     >
                         <path
                         fillRule="evenodd"
-                        d="M8 2a2 2 0 00-2 2v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H8zm0 2h4a.5.5 0 01.5.5V5H7v-.5A.5.5 0 018 4zm2 5a.5.5 0 000 1h4a.5.5 0 000-1h-4z"
+                        d="M8 2a2 2 0 00-2 2v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H8zm0 2h3a.5.5 0 01.5.5V5H7v-.5A.5.5 0 018 4zm2 5a.5.5 0 000 1h3a.5.5 0 000-1h-4z"
                         clipRule="evenodd"
                         />
                     </svg>

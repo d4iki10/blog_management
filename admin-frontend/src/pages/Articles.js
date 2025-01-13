@@ -1,4 +1,3 @@
-// admin-frontend/src/pages/Articles.js
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -128,106 +127,106 @@ const Articles = () => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+            <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold">記事一覧</h2>
-        </div>
-        {/* 「選択した記事を削除」ボタンの追加 */}
-        <div className="mb-4 flex space-x-4">
+            </div>
+            {/* 「選択した記事を削除」ボタンの追加 */}
+            <div className="mb-4 flex space-x-4">
             <button
-            onClick={handleBulkDelete}
-            className={`px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none ${
+                onClick={handleBulkDelete}
+                className={`px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none ${
                 selectedSlugs.length === 0 ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={selectedSlugs.length === 0}
+                }`}
+                disabled={selectedSlugs.length === 0}
             >
-            選択した記事を削除
+                選択した記事を削除
             </button>
             {/* 既存のボタンを再配置する場合は必要に応じて追加 */}
             <Link
-            to="/articles/new"
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none"
+                to="/articles/new"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none"
             >
-            新規作成
+                新規作成
             </Link>
             <button
-            onClick={handleAutoGenerate}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+                onClick={handleAutoGenerate}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
             >
-            自動生成
+                自動生成
             </button>
-        </div>
-        {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">
-            {error}
             </div>
-        )}
-        <div className="overflow-x-auto">
+            {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">
+                {error}
+            </div>
+            )}
+            <div className="overflow-x-auto">
             <table className="min-w-full bg-white">
-            <thead>
+                <thead>
                 <tr>
-                {/* 全選択用のチェックボックス */}
-                <th className="py-2 px-4 border-b text-center">
+                    {/* 全選択用のチェックボックス */}
+                    <th className="py-2 px-4 border-b text-center">
                     <input
-                    type="checkbox"
-                    onChange={handleSelectAllChange}
-                    checked={
+                        type="checkbox"
+                        onChange={handleSelectAllChange}
+                        checked={
                         selectedSlugs.length === articles.length &&
                         articles.length > 0
-                    }
+                        }
                     />
-                </th>
-                <th className="py-2 px-4 border-b">タイトル</th>
-                <th className="py-2 px-4 border-b">スラッグ</th>
-                <th className="py-2 px-4 border-b">ステータス</th>
-                <th className="py-2 px-4 border-b">カテゴリー</th>
-                <th className="py-2 px-4 border-b">監修者</th>
-                <th className="py-2 px-4 border-b">作成日</th>
+                    </th>
+                    <th className="py-2 px-4 border-b">タイトル</th>
+                    <th className="py-2 px-4 border-b">スラッグ</th>
+                    <th className="py-2 px-4 border-b">ステータス</th>
+                    <th className="py-2 px-4 border-b">カテゴリー</th>
+                    <th className="py-2 px-4 border-b">監修者</th>
+                    <th className="py-2 px-4 border-b">作成日</th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 {articles.map((article) => (
-                <tr key={article.id} className="hover:bg-gray-100">
+                    <tr key={article.id} className="hover:bg-gray-100">
                     {/* チェックボックス */}
                     <td className="py-2 px-4 border-b text-center">
-                    <input
+                        <input
                         type="checkbox"
                         checked={selectedSlugs.includes(article.slug)}
                         onChange={(e) => handleCheckboxChange(e, article.slug)}
-                    />
+                        />
                     </td>
                     {/* タイトルをリンクに変更 */}
                     <td className="py-2 px-4 border-b">
-                    <Link
+                        <Link
                         to={`/articles/edit/${article.slug}`}
                         className="text-blue-600 hover:underline"
-                    >
+                        >
                         {article.title}
-                    </Link>
+                        </Link>
                     </td>
                     <td className="py-2 px-4 border-b">{article.slug}</td>
                     <td className="py-2 px-4 border-b">{article.status}</td>
                     <td className="py-2 px-4 border-b">
-                    {article.category ? article.category.name : "なし"}
+                        {article.category ? article.category.name : "なし"}
                     </td>
                     <td className="py-2 px-4 border-b">
-                    {article.supervisor ? article.supervisor.name : "なし"}
+                        {article.supervisor ? article.supervisor.name : "なし"}
                     </td>
                     <td className="py-2 px-4 border-b">
-                    {new Date(article.created_at).toLocaleDateString()}
+                        {new Date(article.created_at).toLocaleDateString()}
                     </td>
-                </tr>
+                    </tr>
                 ))}
                 {articles.length === 0 && (
-                <tr>
+                    <tr>
                     <td colSpan="7" className="text-center py-4">
-                    記事がありません。
+                        記事がありません。
                     </td>
-                </tr>
+                    </tr>
                 )}
-            </tbody>
+                </tbody>
             </table>
-        </div>
+            </div>
         </div>
     );
 };

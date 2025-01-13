@@ -99,7 +99,7 @@ const Categories = () => {
     };
 
     return (
-        <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md">
+        <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
             <h2 className="text-2xl font-semibold mb-4">カテゴリー管理</h2>
             {error && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">

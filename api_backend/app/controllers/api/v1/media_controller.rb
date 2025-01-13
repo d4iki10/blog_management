@@ -1,4 +1,3 @@
-# api_backend/app/controllers/api/v1/media_controller.rb
 class Api::V1::MediaController < ApplicationController
   before_action :authorize_request
 
