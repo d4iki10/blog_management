@@ -17,6 +17,7 @@ import Supervisors from "./pages/Supervisors";
 import Tags from "./pages/Tags";
 import MenuBar from "./components/MenuBar";
 import Media from "./components/Media";
+import { useState } from "react";
 
 const App = () => {
   return (
@@ -31,29 +32,34 @@ const App = () => {
 const AppRoutes = () => {
   const { currentUser } = useAuth();
 
+  // メニューの開閉状態を管理するステート
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
+
   return (
     <>
       {currentUser ? (
         // 認証済みユーザー向けのレイアウト
         <div className="flex">
-          <MenuBar />
-          <div className="flex-1 ml-64 p-6 bg-gray-100 min-h-screen">
+          {/* isMenuOpen を渡す */}
+          <MenuBar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+          <div
+            className={`flex-1 ${
+              isMenuOpen
+            } p-6 bg-gray-100 min-h-screen transition-all duration-300`}
+          >
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/articles" element={<Articles />} />
               <Route path="/articles/new" element={<ArticleForm />} />
               <Route path="/articles/edit/:slug" element={<ArticleForm />} />
-              {/* 追加 */}
               <Route
                 path="/articles/auto-generate"
                 element={<AutoGenerateArticle />}
               />{" "}
-              {/* 追加 */}
               <Route path="/categories" element={<Categories />} />
               <Route path="/users" element={<Users />} />
               <Route path="/supervisors" element={<Supervisors />} />{" "}
-              {/* 追加 */}
-              <Route path="/tags" element={<Tags />} /> {/* 追加 */}
+              <Route path="/tags" element={<Tags />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
               <Route path="/media" element={<Media />} />
             </Routes>

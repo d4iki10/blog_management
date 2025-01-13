@@ -1,4 +1,3 @@
-// blog_frontend/pages/[slug].tsx
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import React from "react";
@@ -213,7 +212,7 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
 
         {/* Tags Section */}
         <section className="mt-8">
-          <h3 className="text-xl font-semibold">タグ:</h3>
+          <h3 className="text-xl font-semibold mb-4">タグ:</h3>
           <div className="flex flex-wrap gap-2">
             {article.tags.map((tag) => (
               <a
@@ -227,76 +226,37 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
           </div>
         </section>
 
-        {/* コメントセクション（オプション） */}
-        {article.comments && (
-          <section className="mt-12">
-            <h3 className="text-2xl font-semibold mb-4">コメント</h3>
-            <div className="space-y-4">
-              {article.comments.map((comment) => (
-                <div key={comment.id} className="p-4 border rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    {comment.user.profile_image_url && (
-                      <img
-                        src={comment.user.profile_image_url}
-                        alt={comment.user.name}
-                        className="w-8 h-8 rounded-full"
-                      />
-                    )}
-                    <span className="font-semibold">{comment.user.name}</span>
-                    <span className="text-sm text-gray-500">
-                      {formatDate(comment.created_at)}
-                    </span>
-                  </div>
-                  <p className="text-gray-700">{comment.content}</p>
-                </div>
-              ))}
-            </div>
-            {/* コメント投稿フォーム（未実装） */}
-            <form className="mt-6">
-              <textarea
-                className="w-full p-2 border rounded-lg"
-                rows={4}
-                placeholder="コメントを入力してください..."
-              ></textarea>
-              <button
-                type="submit"
-                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                コメントを投稿
-              </button>
-            </form>
-          </section>
-        )}
-
         {/* ソーシャルシェアボタン（オプション） */}
-        <section className="mt-8 flex space-x-4">
-          <a
-            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-              `${process.env.NEXT_PUBLIC_API_BASE_URL}/${article.category.slug}/${article.slug}`
-            )}&text=${encodeURIComponent(article.title)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
-          >
-            Twitterで共有
-          </a>
-          <a
-            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-              `${process.env.NEXT_PUBLIC_API_BASE_URL}/${article.category.slug}/${article.slug}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Facebookで共有
-          </a>
-          {/* 他のSNSも同様に追加可能 */}
+        <section className="mt-8">
+          <h3 className="text-xl font-semibold mb-4">SNSに共有:</h3>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/${article.category.slug}/${article.slug}`
+              )}&text=${encodeURIComponent(article.title)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
+            >
+              Twitterで共有
+            </a>
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/${article.category.slug}/${article.slug}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Facebookで共有
+            </a>
+          </div>
         </section>
 
         {/* Back to Category Link */}
         <div className="mt-12">
           <a
-            href={`/${article.category.slug}`}
+            href={`/category/${article.category.slug}`}
             className="text-blue-600 hover:text-blue-800"
           >
             &larr; {article.category.name}に戻る

@@ -50,7 +50,7 @@ const TagPage: React.FC<TagPageProps> = ({
     currentPage,
     totalPages,
     tagName,
-    }) => {
+}) => {
     return (
         <>
         <Head>
@@ -77,7 +77,7 @@ const TagPage: React.FC<TagPageProps> = ({
             <div className="mt-6">
             <Link href="/">
                 <span className="text-blue-500 hover:underline cursor-pointer">
-                ホームに戻る
+                &larr; ホームに戻る
                 </span>
             </Link>
             </div>
