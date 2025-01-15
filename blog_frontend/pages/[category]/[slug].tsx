@@ -49,13 +49,6 @@ interface Article {
   featured_image_url?: string;
 }
 
-interface Comment {
-  id: number;
-  user: User;
-  content: string;
-  created_at: string;
-}
-
 interface ArticleProps {
   article: Article;
 }
@@ -70,8 +63,6 @@ const formatDate = (dateString: string): string => {
 };
 
 const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
-  const router = useRouter();
-  const { category } = router.query;
   return (
     <>
       <Head>
