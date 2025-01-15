@@ -77,7 +77,7 @@ const TagPage: React.FC<TagPageProps> = ({
             <div className="mt-6">
             <Link href="/">
                 <span className="text-blue-500 hover:underline cursor-pointer">
-                &larr; ホームに戻る
+                    &larr; ホームに戻る
                 </span>
             </Link>
             </div>
@@ -94,56 +94,56 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     try {
         // 1. タグ情報の取得
         const tagResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/tags?slug=${encodeURIComponent(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/tags?slug=${encodeURIComponent(
             slug as string
-        )}`,
-        {
-            method: "GET",
-            headers: {
-            "Content-Type": "application/json",
-            },
-        }
+            )}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
         );
 
         if (!tagResponse.ok) {
-        if (tagResponse.status === 404) {
-            return { notFound: true };
-        }
-        throw new Error(`HTTP error! status: ${tagResponse.status}`);
+            if (tagResponse.status === 404) {
+                return { notFound: true };
+            }
+            throw new Error(`HTTP error! status: ${tagResponse.status}`);
         }
 
         const tags: Tag[] = await tagResponse.json();
 
         if (!tags || tags.length === 0) {
-        return { notFound: true };
+            return { notFound: true };
         }
 
         const tag = tags[0];
 
         // 2. 記事情報の取得
         const articlesResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/articles?tag_id=${tag.id}&status=published&page=${page}&per_page=${perPage}`,
-        {
-            method: "GET",
-            headers: {
-            "Content-Type": "application/json",
-            },
-        }
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/articles?tag_id=${tag.id}&status=published&page=${page}&per_page=${perPage}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
         );
 
         if (!articlesResponse.ok) {
-        if (articlesResponse.status === 404) {
-            // タグは存在するが記事が存在しない場合
-            return {
-            props: {
-                articles: [],
-                currentPage: 1,
-                totalPages: 1,
-                tagName: tag.name,
-            },
-            };
-        }
-        throw new Error(`HTTP error! status: ${articlesResponse.status}`);
+            if (articlesResponse.status === 404) {
+                // タグは存在するが記事が存在しない場合
+                return {
+                    props: {
+                    articles: [],
+                    currentPage: 1,
+                    totalPages: 1,
+                    tagName: tag.name,
+                    },
+                };
+            }
+            throw new Error(`HTTP error! status: ${articlesResponse.status}`);
         }
 
         const data = await articlesResponse.json();
@@ -151,49 +151,53 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         let articles: Article[] = [];
         let meta: Meta = {
-        current_page: 1,
-        total_pages: 1,
-        per_page: perPage,
-        total_count: 0,
+            current_page: 1,
+            total_pages: 1,
+            per_page: perPage,
+            total_count: 0,
         };
 
         if (Array.isArray(data)) {
-        // APIが配列を返す場合
-        articles = data.sort(
+            // APIが配列を返す場合
+            articles = data.sort(
             (a: Article, b: Article) =>
-            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-        );
-        meta.total_count = articles.length;
-        meta.total_pages = Math.ceil(meta.total_count / perPage) || 1;
-        articles = articles.slice((page - 1) * perPage, page * perPage);
+                new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+            );
+            meta.total_count = articles.length;
+            meta.total_pages = Math.ceil(meta.total_count / perPage) || 1;
+            articles = articles.slice((page - 1) * perPage, page * perPage);
         } else if (data.articles && data.meta) {
-        // APIがオブジェクトを返す場合
-        articles = data.articles.sort(
+            // APIがオブジェクトを返す場合
+            articles = data.articles.sort(
             (a: Article, b: Article) =>
-            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-        );
-        meta = data.meta;
+                new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+            );
+            meta = data.meta;
         } else {
-        throw new Error("API response structure is unexpected");
+            throw new Error("API response structure is unexpected");
         }
 
         return {
-        props: {
+            props: {
             articles,
             currentPage: meta.current_page,
             totalPages: meta.total_pages,
             tagName: tag.name,
-        },
+            },
         };
-    } catch (error: any) {
-        console.error("タグ記事の取得に失敗しました:", error.message);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("タグ記事の取得に失敗しました:", error.message);
+        } else {
+            console.error("未知のエラーが発生しました");
+        }
         return {
-        props: {
-            articles: [],
-            currentPage: 1,
-            totalPages: 1,
-            tagName: slug as string,
-        },
+            props: {
+                articles: [],
+                currentPage: 1,
+                totalPages: 1,
+                tagName: slug as string,
+            },
         };
     }
 };

@@ -47,61 +47,65 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     try {
         const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/articles?page=${page}&per_page=${perPage}`,
-        {
-            method: "GET",
-            headers: {
-            "Content-Type": "application/json",
-            },
-        }
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/articles?page=${page}&per_page=${perPage}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
         );
 
         const data = await response.json();
         console.log("Fetched Data:", data);
 
         if (!data) {
-        throw new Error("API response is empty");
+            throw new Error("API response is empty");
         }
 
         // データが配列の場合
         if (Array.isArray(data)) {
-        // updated_atで降順にソート
-        const sortedData = data.sort(
+            // updated_atで降順にソート
+            const sortedData = data.sort(
             (a: Article, b: Article) =>
-            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-        );
+                new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+            );
 
-        const totalPages = Math.ceil(sortedData.length / perPage) || 1;
-        return {
-            props: {
-            articles: sortedData,
-            currentPage: page,
-            totalPages: totalPages,
-            },
-        };
+            const totalPages = Math.ceil(sortedData.length / perPage) || 1;
+            return {
+                props: {
+                    articles: sortedData,
+                    currentPage: page,
+                    totalPages: totalPages,
+                },
+            };
         }
 
         // データがオブジェクトで、articlesとmetaが存在する場合
         if (data.articles && data.meta) {
-        const sortedArticles = data.articles.sort(
+            const sortedArticles = data.articles.sort(
             (a: Article, b: Article) =>
-            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-        );
+                new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+            );
 
-        return {
-            props: {
-            articles: sortedArticles,
-            currentPage: data.meta.current_page,
-            totalPages: data.meta.total_pages,
-            },
-        };
+            return {
+                props: {
+                    articles: sortedArticles,
+                    currentPage: data.meta.current_page,
+                    totalPages: data.meta.total_pages,
+                },
+            };
         }
 
         throw new Error("API response structure is unexpected");
-    } catch (error: any) {
-        console.error("記事の取得に失敗しました:", error.message);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("記事の取得に失敗しました:", error.message);
+        } else {
+            console.error("未知のエラーが発生しました");
+        }
         return {
-        props: { articles: [], currentPage: 1, totalPages: 1 },
+            props: { articles: [], currentPage: 1, totalPages: 1 },
         };
     }
 };

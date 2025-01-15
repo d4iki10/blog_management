@@ -187,15 +187,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             categoryName: category.name,
         },
         };
-    } catch (error: any) {
-        console.error("カテゴリ記事の取得に失敗しました:", error.message);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("カテゴリ記事の取得に失敗しました:", error.message);
+        } else {
+            console.error("未知のエラーが発生しました");
+        }
         return {
-        props: {
-            articles: [],
-            currentPage: 1,
-            totalPages: 1,
-            categoryName: slug as string,
-        },
+            props: {
+                articles: [],
+                currentPage: 1,
+                totalPages: 1,
+                categoryName: slug as string,
+            },
         };
     }
 };
