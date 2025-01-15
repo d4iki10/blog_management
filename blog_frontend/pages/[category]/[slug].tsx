@@ -1,4 +1,5 @@
 import { GetServerSideProps } from "next";
+import Link from "next/link";
 import Head from "next/head";
 import React from "react";
 import ReactMarkdown from "react-markdown";
@@ -11,7 +12,6 @@ interface User {
   id: number;
   email: string;
   name: string;
-  profile_image_url?: string;
   role: string;
   created_at: string;
   updated_at: string;
@@ -71,6 +71,7 @@ const formatDate = (dateString: string): string => {
 
 const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
   const router = useRouter();
+  const { category } = router.query;
   return (
     <>
       <Head>
@@ -127,20 +128,20 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
         <nav className="text-sm mb-6" aria-label="Breadcrumb">
           <ol className="flex text-gray-700 space-x-2">
             <li>
-              <a href="/" className="text-blue-600 hover:text-blue-800">
+              <Link href="/" className="text-blue-600 hover:text-blue-800">
                 ホーム
-              </a>
+              </Link>
             </li>
             <li>
               <span>/</span>
             </li>
             <li>
-              <a
+              <Link
                 href={`/category/${article.category.slug}`}
                 className="text-blue-600 hover:text-blue-800"
               >
                 {article.category.name}
-              </a>
+              </Link>
             </li>
             <li>
               <span>/</span>
@@ -157,7 +158,7 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
           {article.featured_image_url && (
             <div className="w-full h-auto mb-6 rounded">
               <Image
-                src={article.featured_image_url}
+                src={article.featured_image_url || "/default-profile.png"} // デフォルト画像を設定
                 alt={article.title}
                 width={800}
                 height={600}
@@ -168,15 +169,6 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
             </div>
           )}
           <div className="flex items-center text-gray-600 space-x-2">
-            {article.user.profile_image_url && (
-              <Image
-                src={article.user.profile_image_url || "/default-profile.png"} // デフォルト画像を設定
-                alt={article.user.name}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-            )}
             <span>公開日: {formatDate(article.created_at)}</span>
             {article.supervisor && (
               <>
@@ -213,13 +205,13 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
           <h3 className="text-xl font-semibold mb-4">タグ:</h3>
           <div className="flex flex-wrap gap-2">
             {article.tags.map((tag) => (
-              <a
+              <Link
                 key={tag.id}
                 href={`/tags/${tag.name.toLowerCase()}`}
                 className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition"
               >
                 #{tag.name}
-              </a>
+              </Link>
             ))}
           </div>
         </section>
@@ -228,7 +220,7 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
         <section className="mt-8">
           <h3 className="text-xl font-semibold mb-4">SNSに共有:</h3>
           <div className="flex flex-wrap gap-2">
-            <a
+            <Link
               href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/${article.category.slug}/${article.slug}`
               )}&text=${encodeURIComponent(article.title)}`}
@@ -237,8 +229,8 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
               className="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
             >
               Twitterで共有
-            </a>
-            <a
+            </Link>
+            <Link
               href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/${article.category.slug}/${article.slug}`
               )}`}
@@ -247,18 +239,17 @@ const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Facebookで共有
-            </a>
+            </Link>
           </div>
         </section>
 
         {/* カテゴリリンク */}
         <div className="mt-12">
-          <a
-            href={`/category/${article.category.slug}`}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            &larr; {article.category.name}に戻る
-          </a>
+          <Link href={`/category/${article.category.slug}`}>
+            <span className="text-blue-600 hover:text-blue-800">
+              &larr; {article.category.name}に戻る
+            </span>
+          </Link>
         </div>
       </div>
     </>
