@@ -26,15 +26,19 @@ const ArticlesPage: React.FC<ArticlesProps> = ({
 }) => {
     return (
         <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">記事一覧</h1>
-        {articles.length > 0 ? (
+            <h1 className="text-3xl font-bold mb-6">記事一覧</h1>
+            {articles.length > 0 ? (
             articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+                <ArticleCard key={article.id} article={article} />
             ))
-        ) : (
+            ) : (
             <p>記事がありません。</p>
-        )}
-        <Pagination currentPage={currentPage} totalPages={totalPages} />
+            )}
+            <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            basePath={`/`}
+            />
         </div>
     );
 };
