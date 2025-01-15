@@ -2,7 +2,7 @@
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
 ARG RUBY_VERSION=3.2.2
-FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim as base
+FROM ruby:$RUBY_VERSION-slim as base
 
 # Rails app lives here
 WORKDIR /rails
@@ -19,11 +19,16 @@ FROM base as build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config python3 python3-pip
+    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config python3 python3-pip python3-venv
+
+RUN python3 -m venv /opt/venv
+
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Install Python libs
 COPY requirements.txt requirements.txt
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -44,15 +49,15 @@ FROM base
 # Install packages needed for deployment
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl libvips postgresql-client \
-    python3 python3-pip && \
+    python3 python3-pip python3-venv && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle
+COPY --from=build /opt/venv /opt/venv
 COPY --from=build /rails /rails
 
-# Copy Python site-packages from build stage
-COPY --from=build /usr/local/lib/python3.*/site-packages /usr/local/lib/python3.*/site-packages
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
