@@ -63,7 +63,6 @@ const formatDate = (dateString: string): string => {
 };
 
 const ArticlePage: React.FC<ArticleProps> = ({ article }) => {
-  const router = useRouter();
   return (
     <>
       <Head>
