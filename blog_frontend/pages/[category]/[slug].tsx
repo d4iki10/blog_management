@@ -6,7 +6,6 @@ import ReactMarkdown from "react-markdown";
 import Image from "next/image";
 import remarkGfm from "remark-gfm"; // GitHub Flavored Markdownのサポート
 import rehypeRaw from "rehype-raw"; // HTMLをレンダリング（必要に応じて）
-import { useRouter } from "next/router";
 
 interface User {
   id: number;
