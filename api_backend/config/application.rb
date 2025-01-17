@@ -32,7 +32,7 @@ module ApiBackend
 
     config.middleware.insert_before 0, Rack::Cors do
       allow do
-        origins 'http://localhost:3001', 'http://localhost:3002', 'blog-managementadminfrontend.vercel.app' # フロントエンドのURLとポート
+        origins 'http://localhost:3001', 'http://localhost:3002', 'https://blog-managementadminfrontend.vercel.app', 'https://blog-management-ashy.vercel.app' # フロントエンドのURLとポート
         resource '*',
           headers: :any,
           methods: [:get, :post, :put, :patch, :delete, :options, :head],
