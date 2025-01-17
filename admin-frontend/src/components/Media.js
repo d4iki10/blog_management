@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 const Media = ({ onImageSelect, onImageInsert }) => {
     const { token } = useAuth();
+    const { apiRequest } = useAuth();
     const [selectedFile, setSelectedFile] = useState(null);
     const [mediaList, setMediaList] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -14,26 +15,26 @@ const Media = ({ onImageSelect, onImageInsert }) => {
     const fetchMedia = useCallback(async () => {
         setLoading(true);
         try {
-        const response = await fetch("/api/v1/media", {
+            const response = await apiRequest("/media", {
             method: "GET",
             headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
             },
-        });
-        if (response.ok) {
+            });
+            if (response.ok) {
             const data = await response.json();
             setMediaList(data);
-        } else {
+            } else {
             const errorData = await response.json();
             throw new Error(errorData.error || "メディアの取得に失敗しました。");
-        }
+            }
         } catch (err) {
-        setError(err.message);
+            setError(err.message);
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
-    }, [token]);
+    }, [apiRequest]);
 
     useEffect(() => {
         if (token) {
@@ -61,11 +62,11 @@ const Media = ({ onImageSelect, onImageInsert }) => {
         const formData = new FormData();
         formData.append("file", selectedFile);
 
-        const response = await fetch("/api/v1/media/upload", {
+        const response = await apiRequest("/media/upload", {
             method: "POST",
             body: formData,
             headers: {
-            Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
+                Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
             },
         });
 
@@ -89,11 +90,11 @@ const Media = ({ onImageSelect, onImageInsert }) => {
         if (!window.confirm("この画像を削除してもよろしいですか？")) return;
 
         try {
-        const response = await fetch(`/api/v1/media/${id}`, {
+        const response = await apiRequest(`/media/${id}`, {
             method: "DELETE",
             headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
             },
         });
 
