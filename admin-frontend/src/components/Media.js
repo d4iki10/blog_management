@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 const Media = ({ onImageSelect, onImageInsert }) => {
-    const { token } = useAuth();
-    const { apiRequest } = useAuth();
+    const { token, apiRequest } = useAuth();
     const [selectedFile, setSelectedFile] = useState(null);
     const [mediaList, setMediaList] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -16,25 +15,25 @@ const Media = ({ onImageSelect, onImageInsert }) => {
         setLoading(true);
         try {
             const response = await apiRequest("/media", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
-            },
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
+                },
             });
             if (response.ok) {
-            const data = await response.json();
-            setMediaList(data);
+                const data = await response.json();
+                setMediaList(data);
             } else {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "メディアの取得に失敗しました。");
+                const errorData = await response.json();
+                throw new Error(errorData.error || "メディアの取得に失敗しました。");
             }
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
-    }, [apiRequest]);
+    }, [token, apiRequest]);
 
     useEffect(() => {
         if (token) {
