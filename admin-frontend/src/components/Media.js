@@ -17,8 +17,8 @@ const Media = ({ onImageSelect, onImageInsert }) => {
             const response = await apiRequest("/media", {
                 method: "GET",
                 headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
+                    // "Content-Type": "application/json",
+                    // Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
                 },
             });
             if (response.ok) {
@@ -33,7 +33,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
         } finally {
             setLoading(false);
         }
-    }, [token, apiRequest]);
+    }, [apiRequest]);
 
     useEffect(() => {
         if (token) {
@@ -50,37 +50,37 @@ const Media = ({ onImageSelect, onImageInsert }) => {
     // アップロードハンドラ
     const handleUpload = async () => {
         if (!selectedFile) {
-        setError("ファイルを選択してください。");
-        return;
+            setError("ファイルを選択してください。");
+            return;
         }
 
         setUploading(true);
         setError("");
 
         try {
-        const formData = new FormData();
-        formData.append("file", selectedFile);
+            const formData = new FormData();
+            formData.append("file", selectedFile);
 
-        const response = await apiRequest("/media/upload", {
-            method: "POST",
-            body: formData,
-            headers: {
-                Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
-            },
-        });
+            const response = await apiRequest("/media/upload", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    // Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
+                },
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if (response.ok) {
-            setMediaList([data, ...mediaList]); // 新しい画像をリストに追加
-            setSelectedFile(null);
-        } else {
-            setError(data.error || "アップロードに失敗しました。");
-        }
+            if (response.ok) {
+                setMediaList([data, ...mediaList]); // 新しい画像をリストに追加
+                setSelectedFile(null);
+            } else {
+                setError(data.error || "アップロードに失敗しました。");
+            }
         } catch (err) {
-        setError("アップロード中にエラーが発生しました。");
+            setError("アップロード中にエラーが発生しました。");
         } finally {
-        setUploading(false);
+            setUploading(false);
         }
     };
 

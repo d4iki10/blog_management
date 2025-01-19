@@ -13,6 +13,9 @@ class Api::V1::MediaController < ApplicationController
         url: Rails.application.routes.url_helpers.url_for(blob)
       }
     }, status: :ok
+  rescue => e
+    Rails.logger.error "メディア取得エラー: #{e.message}"
+    render json: { error: 'メディアの取得に失敗しました。' }, status: :internal_server_error
   end
 
   # POST /api/v1/media/upload

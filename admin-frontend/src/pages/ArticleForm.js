@@ -174,9 +174,9 @@ const ArticleForm = () => {
         // 成功したらリダイレクト
         navigate("/articles");
         } catch (err) {
-        setError(err.message);
+            setError(err.message);
         } finally {
-        setLoading(false); // ローディング終了
+            setLoading(false); // ローディング終了
         }
     };
 
@@ -202,208 +202,209 @@ const ArticleForm = () => {
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
             <h2 className="text-2xl font-semibold mb-4">
-                {isEditing ? "記事編集" : "記事作成"}
+            {isEditing ? "記事編集" : "記事作成"}
             </h2>
             {error && (
-                <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">
+            <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">
                 {error}
-                </div>
+            </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        タイトル:
-                    </label>
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                タイトル:
+                </label>
+                <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="記事のタイトルを入力"
+                />
+            </div>
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                スラッグ:
+                </label>
+                <input
+                type="text"
+                value={slugInput}
+                onChange={(e) => setSlugInput(e.target.value)}
+                required
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="記事のスラッグを入力"
+                />
+            </div>
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                内容 (Markdown):
+                </label>
+                <MarkdownEditor value={content} onChange={setContent} />
+            </div>
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                カテゴリー:
+                </label>
+                <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                >
+                <option value="">選択しない</option>
+                {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                    {category.name}
+                    </option>
+                ))}
+                </select>
+            </div>
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                監修者:
+                </label>{" "}
+                <select
+                value={supervisorId}
+                onChange={(e) => setSupervisorId(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                >
+                <option value="">選択しない</option>
+                {supervisors.map((sup) => (
+                    <option key={sup.id} value={sup.id}>
+                    {sup.name}
+                    </option>
+                ))}
+                </select>
+            </div>
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                タグ:
+                </label>
+                <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                    <label key={tag.id} className="inline-flex items-center">
                     <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                        placeholder="記事のタイトルを入力"
+                        type="checkbox"
+                        value={tag.id}
+                        checked={selectedTagIds.includes(tag.id)}
+                        onChange={handleTagChange}
+                        className="form-checkbox h-5 w-5 text-blue-600"
                     />
-                </div>
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        スラッグ:
+                    <span className="ml-2 text-gray-700">{tag.name}</span>
                     </label>
-                    <input
-                        type="text"
-                        value={slugInput}
-                        onChange={(e) => setSlugInput(e.target.value)}
-                        required
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                        placeholder="記事のスラッグを入力"
+                ))}
+                </div>
+            </div>
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                ステータス:
+                </label>{" "}
+                {/* 追加 */}
+                <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                >
+                <option value="draft">下書き</option>
+                <option value="published">公開</option>
+                </select>
+            </div>
+            {/* アイキャッチを追加ボタン */}
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                アイキャッチ画像:
+                </label>
+            </div>
+            {/* モーダル */}
+            {showMediaModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white p-4 rounded-md shadow-md">
+                    <Media
+                    // 画像を選択すると呼ばれるコールバック
+                    onImageSelect={(image) => {
+                        handleImageSelect(image);
+                        setShowMediaModal(false); // 選択したらモーダルを閉じる
+                    }}
+                    onImageInsert={handleImageInsert}
                     />
-                </div>
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        内容 (Markdown):
-                    </label>
-                    <MarkdownEditor value={content} onChange={setContent} />
-                </div>
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        カテゴリー:
-                    </label>
-                    <select
-                        value={categoryId}
-                        onChange={(e) => setCategoryId(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                    >
-                        <option value="">選択しない</option>
-                        {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                            {category.name}
-                        </option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        監修者:
-                    </label>{" "}
-                    <select
-                        value={supervisorId}
-                        onChange={(e) => setSupervisorId(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                    >
-                        <option value="">選択しない</option>
-                        {supervisors.map((sup) => (
-                        <option key={sup.id} value={sup.id}>
-                            {sup.name}
-                        </option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        タグ:
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                        {tags.map((tag) => (
-                        <label key={tag.id} className="inline-flex items-center">
-                            <input
-                            type="checkbox"
-                            value={tag.id}
-                            checked={selectedTagIds.includes(tag.id)}
-                            onChange={handleTagChange}
-                            className="form-checkbox h-5 w-5 text-blue-600"
-                            />
-                            <span className="ml-2 text-gray-700">{tag.name}</span>
-                        </label>
-                        ))}
-                    </div>
-                </div>
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        ステータス:
-                    </label>{" "}
-                    {/* 追加 */}
-                    <select
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                    >
-                        <option value="draft">下書き</option>
-                        <option value="published">公開</option>
-                    </select>
-                </div>
-                {/* アイキャッチを追加ボタン */}
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        アイキャッチ画像:
-                    </label>
-                </div>
-                {/* モーダル */}
-                {showMediaModal && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                        <div className="bg-white p-4 rounded-md shadow-md">
-                        <Media
-                            // 画像を選択すると呼ばれるコールバック
-                            onImageSelect={(image) => {
-                            handleImageSelect(image);
-                            setShowMediaModal(false); // 選択したらモーダルを閉じる
-                            }}
-                            onImageInsert={handleImageInsert}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowMediaModal(false)}
-                            className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-                        >
-                            閉じる
-                        </button>
-                        </div>
-                    </div>
-                )}
-                {/* すでにアイキャッチが設定されている場合のみ表示 */}
-                {featuredImageUrl && (
-                    <div className="mb-4">
-                        <img
-                        src={featuredImageUrl}
-                        alt="アイキャッチ画像"
-                        className="w-full h-auto rounded"
-                        />
-                        <button
-                        type="button"
-                        onClick={() => setShowMediaModal(true)}
-                        className="px-4 py-2 mr-4 bg-green-600 text-white rounded-md hover:bg-green-700"
-                        >
-                        追加
-                        </button>
-                        <button
-                        type="button"
-                        onClick={() => setFeaturedImageUrl("")}
-                        className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                        >
-                        削除
-                        </button>
-                    </div>
-                )}
-                {/* SEOメタデータの追加 */}
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        Meta Title:
-                    </label>
-                    <input
-                        type="text"
-                        value={metaTitle}
-                        onChange={(e) => setMetaTitle(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                        placeholder="Meta Titleを入力"
-                    />
-                </div>
-                <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
-                        Meta Description:
-                    </label>
-                    <textarea
-                        value={metaDescription}
-                        onChange={(e) => setMetaDescription(e.target.value)}
-                        rows="3"
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                        placeholder="Meta Descriptionを入力（160文字以内）"
-                    ></textarea>
-                </div>
-                <div className="flex space-x-4">
                     <button
-                        type="submit"
-                        disabled={loading}
-                        className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none ${
-                        loading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                    type="button"
+                    onClick={() => setShowMediaModal(false)}
+                    className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
                     >
-                        {loading ? "保存中..." : isEditing ? "更新" : "作成"}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => navigate("/articles")}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none"
-                    >
-                        キャンセル
+                    閉じる
                     </button>
                 </div>
+                </div>
+            )}
+            {/* すでにアイキャッチが設定されている場合のみ表示 */}
+            {featuredImageUrl && (
+                <div className="mb-4">
+                <img
+                    src={featuredImageUrl}
+                    alt="アイキャッチ画像"
+                    className="w-full h-auto rounded"
+                />
+                </div>
+            )}
+            <button
+                type="button"
+                onClick={() => setShowMediaModal(true)}
+                className="px-4 py-2 mr-4 bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+                追加
+            </button>
+            <button
+                type="button"
+                onClick={() => setFeaturedImageUrl("")}
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+                削除
+            </button>
+
+            {/* SEOメタデータの追加 */}
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                Meta Title:
+                </label>
+                <input
+                type="text"
+                value={metaTitle}
+                onChange={(e) => setMetaTitle(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="Meta Titleを入力"
+                />
+            </div>
+            <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                Meta Description:
+                </label>
+                <textarea
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                rows="3"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="Meta Descriptionを入力（160文字以内）"
+                ></textarea>
+            </div>
+            <div className="flex space-x-4">
+                <button
+                type="submit"
+                disabled={loading}
+                className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                >
+                {loading ? "保存中..." : isEditing ? "更新" : "作成"}
+                </button>
+                <button
+                type="button"
+                onClick={() => navigate("/articles")}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none"
+                >
+                キャンセル
+                </button>
+            </div>
             </form>
         </div>
     );
