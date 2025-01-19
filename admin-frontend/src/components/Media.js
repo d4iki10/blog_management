@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 const Media = ({ onImageSelect, onImageInsert }) => {
-    const { token, apiRequest } = useAuth();
+    const { token, apiRequest, currentUser } = useAuth();
     const [selectedFile, setSelectedFile] = useState(null);
     const [mediaList, setMediaList] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -16,10 +16,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
         try {
             const response = await apiRequest("/media", {
                 method: "GET",
-                headers: {
-                    // "Content-Type": "application/json",
-                    // Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
-                },
+                // headers は apiRequest で設定されるため削除
             });
             if (response.ok) {
                 const data = await response.json();
@@ -37,8 +34,8 @@ const Media = ({ onImageSelect, onImageInsert }) => {
 
     useEffect(() => {
         if (token) {
-        // トークンがある場合にのみフェッチ
-        fetchMedia();
+            // トークンがある場合にのみフェッチ
+            fetchMedia();
         }
     }, [token, fetchMedia]);
 
@@ -64,9 +61,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
             const response = await apiRequest("/media/upload", {
                 method: "POST",
                 body: formData,
-                headers: {
-                    // Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
-                },
+                // headers は apiRequest で設定されるため削除
             });
 
             const data = await response.json();
@@ -91,10 +86,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
         try {
         const response = await apiRequest(`/media/${id}`, {
             method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`, // 認証ヘッダーを追加
-            },
+            // headers は apiRequest で設定されるため削除
         });
 
         const data = await response.json();
@@ -105,7 +97,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
             throw new Error(data.error || "削除に失敗しました。");
         }
         } catch (err) {
-        setError(err.message);
+            setError(err.message);
         }
     };
 
