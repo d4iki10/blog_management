@@ -15,6 +15,14 @@ const nextConfig = {
         hostname: "localhost", // IPv4/IPv6どちらでもlocalhost扱いになる
         // ↑ ActiveStorageのURLパターンに合うようにワイルドカードを設定
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com", // 例: Cloudinaryのホスト
+      },
+      {
+        protocol: "https",
+        hostname: "blog-management-zlrw.onrender.com", // 例: バックエンドが画像を提供している場合
+      },
     ],
   },
 };
