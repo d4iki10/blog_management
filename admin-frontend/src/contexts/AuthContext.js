@@ -15,29 +15,29 @@ export const AuthProvider = ({ children }) => {
     // ユーザー情報を取得する関数
     const fetchUser = async (token) => {
         try {
-        const response = await fetch(
-            `${process.env.REACT_APP_API_BASE_URL}/users/me`,
-            {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
+            const response = await fetch(
+                `${process.env.REACT_APP_API_BASE_URL}/users/me`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentUser(data.user);
+            } else {
+                setCurrentUser(null);
+                localStorage.removeItem("token");
+                setToken(null);
             }
-        );
-        if (response.ok) {
-            const data = await response.json();
-            setCurrentUser(data.user);
-        } else {
+        } catch (error) {
+            console.error("ユーザー情報の取得に失敗しました:", error);
             setCurrentUser(null);
             localStorage.removeItem("token");
             setToken(null);
-        }
-        } catch (error) {
-        console.error("ユーザー情報の取得に失敗しました:", error);
-        setCurrentUser(null);
-        localStorage.removeItem("token");
-        setToken(null);
         }
     };
 
@@ -47,11 +47,11 @@ export const AuthProvider = ({ children }) => {
         const response = await fetch(
             `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
             {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
             }
         );
         if (!response.ok) {
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
         setToken(data.token); // トークン状態を更新
         navigate("/dashboard");
         } catch (error) {
-        throw error;
+            throw error;
         }
     };
 
@@ -81,22 +81,32 @@ export const AuthProvider = ({ children }) => {
         const storedToken = localStorage.getItem("token");
         const headers = options.headers || {};
         if (storedToken) {
-        headers["Authorization"] = `Bearer ${storedToken}`;
+            headers["Authorization"] = `Bearer ${storedToken}`;
         }
         const url = `${process.env.REACT_APP_API_BASE_URL}${endpoint}`;
         console.log(`API Request URL: ${url}`); // 追加
         console.log(`Authorization Header: ${headers["Authorization"]}`); // 追加
-        return fetch(url, {
-        ...options,
-        headers,
-        });
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers,
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API Error Response: ${errorText}`);
+            }
+            return response;
+        } catch (error) {
+            console.error(`Fetch Error: ${error}`);
+            throw error;
+        }
     };
 
     // コンポーネントのマウント時にユーザー情報を取得
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
         if (storedToken) {
-        fetchUser(storedToken);
+            fetchUser(storedToken);
         }
     }, []);
 
@@ -104,7 +114,7 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider
         value={{ currentUser, token, login, logout, apiRequest }}
         >
-        {children}
+            {children}
         </AuthContext.Provider>
     );
 };

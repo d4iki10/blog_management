@@ -87,4 +87,7 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # 画像表示するためにホストを設定
+  Rails.application.routes.default_url_options = { host: 'blog-management-zlrw.onrender.com', protocol: 'https' }
 end
