@@ -1,21 +1,18 @@
 #!/bin/bash
 
-# ログファイルの設定
-LOG_FILE="delayed_job.log"
-
 # Delayed Jobをバックグラウンドで起動
-echo "Starting Delayed Job..." | tee -a $LOG_FILE
-bundle exec bin/delayed_job start >> $LOG_FILE 2>&1
+echo "Starting Delayed Job..."
+bundle exec bin/delayed_job start &
 
 # Delayed Jobの起動確認
 sleep 5
-bundle exec bin/delayed_job status >> $LOG_FILE 2>&1
+bundle exec bin/delayed_job status
 if [ $? -ne 0 ]; then
-    echo "Delayed Job failed to start." | tee -a $LOG_FILE
+    echo "Delayed Job failed to start."
     exit 1
 fi
-echo "Delayed Job is running." | tee -a $LOG_FILE
+echo "Delayed Job is running."
 
 # Webサーバーをフォアグラウンドで起動
-echo "Starting Rails server..." | tee -a $LOG_FILE
-bundle exec rails server -p $PORT -e $RAILS_ENV >> $LOG_FILE 2>&1
+echo "Starting Rails server..."
+bundle exec rails server -p $PORT -e $RAILS_ENV
