@@ -1,20 +1,23 @@
 class Api::V1::MediaController < ApplicationController
   before_action :authorize_request
+  include Rails.application.routes.url_helpers
 
   # GET /api/v1/media
   def index
     media = ActiveStorage::Blob.all.order(created_at: :desc)
-    render json: media.map { |blob|
+    media_data = media.map do |blob|
       {
         id: blob.id,
         filename: blob.filename.to_s,
         content_type: blob.content_type,
         byte_size: blob.byte_size,
-        url: Rails.application.routes.url_helpers.url_for(blob)
+        url: url_for(blob) # 正しくフルURLが生成されます
       }
-    }, status: :ok
+    end
+    render json: media_data, status: :ok
   rescue => e
-    Rails.logger.error "メディア取得エラー: #{e.message}"
+    Rails.logger.error "メディア取得エラー: #{e.class} - #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
     render json: { error: 'メディアの取得に失敗しました。' }, status: :internal_server_error
   end
 
@@ -26,18 +29,20 @@ class Api::V1::MediaController < ApplicationController
         filename: params[:file].original_filename,
         content_type: params[:file].content_type
       )
-      render json: {
+      media_data = {
         id: image.id,
         filename: image.filename.to_s,
         content_type: image.content_type,
         byte_size: image.byte_size,
-        url: Rails.application.routes.url_helpers.url_for(image)
-      }, status: :ok
+        url: url_for(image) # 正しくフルURLが生成されます
+      }
+      render json: media_data, status: :ok
     else
       render json: { error: 'ファイルが提供されていません。' }, status: :bad_request
     end
   rescue => e
-    Rails.logger.error "画像アップロードエラー: #{e.message}"
+    Rails.logger.error "画像アップロードエラー: #{e.class} - #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
     render json: { error: '画像のアップロードに失敗しました。' }, status: :internal_server_error
   end
 
@@ -51,7 +56,8 @@ class Api::V1::MediaController < ApplicationController
       render json: { error: '画像が見つかりません。' }, status: :not_found
     end
   rescue => e
-    Rails.logger.error "画像削除エラー: #{e.message}"
+    Rails.logger.error "画像削除エラー: #{e.class} - #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
     render json: { error: '画像の削除に失敗しました。' }, status: :internal_server_error
   end
 end
