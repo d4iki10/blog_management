@@ -1,11 +1,59 @@
-## 開発言語
-- フロントエンド
-  - React（18.3.1）：管理画面
-  - Next.js（15.0.2）：ブログページ
-- バックエンド
-  - Ruby（3.2.2）
-  - Rails（7.1.5）
-  - Python（3.13.1）
+# Blog+
+コンテンツの作成が難しい方に向けて、記事を自動生成できるツールを作成。
+## URL
+### 管理画面
+<https://blog-managementadminfrontend.vercel.app/login>
+- 以下のメールアドレスとパスワードからログインできます。
+  - メールアドレス: <admin@example.com>
+  - パスワード: password
+### ブログ画面
+<https://blog-management-ashy.vercel.app/>
+## 使用技術
+- React（18.3.1）：管理画面
+- Next.js（15.0.2）：ブログ画面
+- Ruby（3.2.2）
+- Rails（7.1.5）
+- Python（3.13.1）
+- PostgreSQL
+- react-markdown-editor-lite（<https://github.com/HarryChen0506/react-markdown-editor-lite>）
+- OpenAI API
+- Gemini API
+- Vercel（管理画面、ブログ画面デプロイ用）
+- Render（バックエンド、PostgreSQLデプロイ用）
+- Cloudinary（画像管理用）
+## 機能一覧
+### 【管理画面】
+| ログイン画面 | 記事一覧画面 |
+| ---- | ---- |
+| ![ログイン画面](/Users/ogi-dai/dpro/portfolio_cms_app/img/admin-frontend/login.png) | ![記事一覧]</Users/ogi-dai/dpro/portfolio_cms_app/img/admin-frontend/article-list.png> |
+| メールアドレスとパスワードでの認証機能を実装しました。 | 作成した記事のステータス管理や作成日などが一覧で確認できます。 |
+
+| 記事編集画面 | 画像管理画面 |
+| ---- | ---- |
+| ![記事編集画面](/Users/ogi-dai/dpro/portfolio_cms_app/img/admin-frontend/article-form.gif) | ![画像管理]</Users/ogi-dai/dpro/portfolio_cms_app/img/admin-frontend/image.png> |
+| Markdown形式で記事を編集、その他アイキャッチ画像やmetaタグなども編集できます。 | 画像のアップロードと管理機能を実装しました。 |
+
+### 【ブログ画面】
+- 最新記事一覧
+  - 全記事
+  - カテゴリ別
+  - タグ別
+- 記事ページ
+## 各画面ごとの実装ポイント
+### Rails API
+- 記事自動生成機能について
+  - `perform`メソッドで複数のPythonスクリプトを呼び出し、記事の自動生成を行なっている。
+  - `Open3.capture3`を使った標準出力・標準エラーの取得、ログ出力、エラーハンドリングなどを適切に行っている。
+  - 例外発生時にはログを出力し、`raise`で再スローしているため再試行可能。
+- その他
+  - ステータス管理（`draft` / `published`）を行い、公開前を下書き保存できる。
+  - ページネーション`kaminari`を使用
+  - `jwt_decode` / `jwt_encode` などの認証実装と組み合わせて、管理者向けと公開向けのエンドポイントを制御している。
+### Python
+- 事前に設計したプロンプトをもとに、Gemini APIから実際にコンテンツを自動生成。
+- JSON形式で返すことで、Rails側からのエラーハンドリングがしやすくしている。
+### React
+-
 ## カタログ設計
 https://docs.google.com/spreadsheets/d/1FWzUq65WYtL9W5-CyxKlk3CAp8lYN3GAIsbLKvAWH90/edit?gid=782464957#gid=782464957
 ## テーブル定義署
