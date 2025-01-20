@@ -12,34 +12,35 @@ class ArticleGenerationJob < ApplicationJob
     keyword = article_input['topic'] # トピックをキーワードとして使用
     Rails.logger.info "記事自動生成のキーワード: #{keyword}"
 
-    # 1. Webスクレイピング
-    Rails.logger.info "scrape.py が起動しています: #{keyword}"
-    scraped_data = run_python_script('scripts/scrape.py', keyword)
-    Rails.logger.debug "スクレイピングデータ: #{scraped_data}"
-    begin
-      scraped_json = parse_json(scraped_data, 'scrape.py')
-      Rails.logger.debug "スクレイピングデータ（parsed）: #{scraped_json}"
-    rescue JSON::ParserError => e
-      Rails.logger.error "スクレイピングデータのパースに失敗: #{e.message}"
-      raise e
-    end
+    # # 1. Webスクレイピング
+    # Rails.logger.info "scrape.py が起動しています: #{keyword}"
+    # scraped_data = run_python_script('scripts/scrape.py', keyword)
+    # Rails.logger.debug "スクレイピングデータ: #{scraped_data}"
+    # begin
+    #   scraped_json = parse_json(scraped_data, 'scrape.py')
+    #   Rails.logger.debug "スクレイピングデータ（parsed）: #{scraped_json}"
+    # rescue JSON::ParserError => e
+    #   Rails.logger.error "スクレイピングデータのパースに失敗: #{e.message}"
+    #   raise e
+    # end
 
-    # 2. 機械学習による分析
-    Rails.logger.info "analyze.py が起動しています"
-    analyzed_data = run_python_script('scripts/analyze.py', scraped_data)
-    Rails.logger.debug "分析データ: #{analyzed_data}"
-    begin
-      analyzed_json = parse_json(analyzed_data, 'analyze.py')
-      Rails.logger.debug "分析データ（parsed）: #{analyzed_json}"
-    rescue JSON::ParserError => e
-      Rails.logger.error "分析データのパースに失敗: #{e.message}"
-      Rails.logger.error "分析スクリプトの出力: #{analyzed_data}"
-      raise e
-    end
+    # # 2. 機械学習による分析
+    # Rails.logger.info "analyze.py が起動しています"
+    # analyzed_data = run_python_script('scripts/analyze.py', scraped_data)
+    # Rails.logger.debug "分析データ: #{analyzed_data}"
+    # begin
+    #   analyzed_json = parse_json(analyzed_data, 'analyze.py')
+    #   Rails.logger.debug "分析データ（parsed）: #{analyzed_json}"
+    # rescue JSON::ParserError => e
+    #   Rails.logger.error "分析データのパースに失敗: #{e.message}"
+    #   Rails.logger.error "分析スクリプトの出力: #{analyzed_data}"
+    #   raise e
+    # end
 
     # 3. プロンプトの作成
     Rails.logger.info "generate_prompt.py が起動しています"
-    prompt = run_python_script('scripts/generate_prompt.py', analyzed_data)
+    # prompt = run_python_script('scripts/generate_prompt.py', analyzed_data)
+    prompt = run_python_script('scripts/generate_prompt.py', keyword)
     Rails.logger.debug "プロンプト生成: #{prompt}"
 
     # 4. ChatGPT APIによる記事生成
