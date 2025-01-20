@@ -6,19 +6,26 @@ import google.generativeai as genai
 import openai  # OpenAI を保持する場合（必要に応じて）
 import requests  # OpenAI を保持する場合（必要に応じて）
 
+def load_local_env():
+    """
+    ローカル専用：.env があれば読み込む。
+    なければ無視する（本番は Render の EnvVars を使用）。
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    dotenv_path = os.path.join(script_dir, '..', '.env')
+
+    if os.path.exists(dotenv_path):
+        # .env ファイルがあれば読み込む（ローカル）
+        load_dotenv(dotenv_path)
+    else:
+        # 本番想定：.env がなくてもエラーにしない
+        pass
+
 def generate_article_openai(prompt):
     """
     OpenAI APIを使用して記事を生成するメソッド。
     """
-    # スクリプトのディレクトリを取得
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # .env ファイルのパスを設定（プロジェクトのルートに配置している場合）
-    dotenv_path = os.path.join(script_dir, '..', '.env')
-    # .env ファイルを読み込む
-    if not load_dotenv(dotenv_path):
-        print(json.dumps({"error": f".env ファイルが見つかりませんでした: {dotenv_path}"}))
-        sys.exit(1)
-
+    load_local_env()   # ローカルなら .env を読み込む
     # 環境変数からAPIキーを取得
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     if not OPENAI_API_KEY:
@@ -49,15 +56,7 @@ def generate_article_gemini(prompt):
     """
     Gemini APIを使用して記事を生成するメソッド。
     """
-    # スクリプトのディレクトリを取得
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # .env ファイルのパスを設定（プロジェクトのルートに配置している場合）
-    dotenv_path = os.path.join(script_dir, '..', '.env')
-    # .env ファイルを読み込む
-    if not load_dotenv(dotenv_path):
-        print(json.dumps({"error": f".env ファイルが見つかりませんでした: {dotenv_path}"}))
-        sys.exit(1)
-
+    load_local_env()   # ローカルなら .env を読み込む
     # 環境変数からGemini APIキーを取得
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     if not GEMINI_API_KEY:
