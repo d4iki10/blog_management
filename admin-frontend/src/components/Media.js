@@ -139,7 +139,7 @@ const Media = ({ onImageSelect, onImageInsert }) => {
 
             {/* メディア一覧セクション */}
             <div>
-            <h3 className="text-md font-semibold mb-2">既存の画像:</h3>
+            <h3 className="text-md font-semibold mb-2">登録した画像一覧:</h3>
             {loading ? (
                 <div>読み込み中...</div>
             ) : mediaList.length === 0 ? (

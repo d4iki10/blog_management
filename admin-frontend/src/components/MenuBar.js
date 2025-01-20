@@ -10,7 +10,7 @@ const MenuBar = ({ isMenuOpen, setIsMenuOpen }) => {
     const navItems = [
         { name: "ダッシュボード", path: "/dashboard" },
         { name: "記事管理", path: "/articles" },
-        { name: "カテゴリー管理", path: "/categories" },
+        { name: "カテゴリ管理", path: "/categories" },
         { name: "タグ管理", path: "/tags" },
         { name: "画像管理", path: "/media" },
     ];
