@@ -79,7 +79,9 @@ class Api::V1::ArticlesController < ApplicationController
     if article.save
       Rails.logger.info "Article created with ID #{article.id}"
       # バックグラウンドジョブをキューに追加
-      ArticleGenerationJob.perform_later(article.id, article_params.to_h)
+      keyword = article_params[:topic].presence || "default"
+      Rails.logger.info "自動生成開始: キーワード=#{keyword}"
+      ArticleGenerationJob.perform_later(article.id, keyword)
       render json: { message: '記事生成を開始しました。下書きが作成されます。', article: ArticleSerializer.new(article) }, status: :accepted
     else
       Rails.logger.error "Article creation failed: #{article.errors.full_messages}"
