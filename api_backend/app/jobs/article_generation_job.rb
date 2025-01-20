@@ -71,7 +71,7 @@ class ArticleGenerationJob < ApplicationJob
 
   def run_python_script(script_path, *args)
     absolute_script_path = Rails.root.join(script_path).to_s
-    python_executable = Rails.root.join('venv', 'bin', 'python3').to_s
+    python_executable = python_exec_for_env
     command = [python_executable, absolute_script_path] + args.map(&:to_s)
 
     Rails.logger.info "起動しているコマンド: #{command.join(' ')}"
@@ -88,6 +88,17 @@ class ArticleGenerationJob < ApplicationJob
     else
       Rails.logger.error "Python のスクリプト #{script_path} エラー: #{stderr}"
       raise "Python script #{script_path} failed: #{stderr}"
+    end
+  end
+
+  # 環境ごとにPython実行パスを切り替える
+  def python_exec_for_env
+    if Rails.env.production?
+      # 本番環境: システムのpython3
+      "python3"
+    else
+      # 開発 or テスト環境: venv/bin/python3
+      Rails.root.join("venv", "bin", "python3").to_s
     end
   end
 
