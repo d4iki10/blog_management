@@ -5,11 +5,12 @@ class ArticleGenerationJob < ApplicationJob
   require 'shellwords'
   require 'open3'
 
-  def perform(article_id, article_input)
+  # def perform(article_id, article_input)
+  def perform(article_id, keyword)
     Rails.logger.info "記事自動生成ジョブ開始: article_id=#{article_id}"
     article = Article.find(article_id)
     Rails.logger.info "記事を取得しました: #{article.inspect}"
-    keyword = article_input['topic'] # トピックをキーワードとして使用
+    # keyword = article_input['topic'] # トピックをキーワードとして使用
     Rails.logger.info "記事自動生成のキーワード: #{keyword}"
 
     # # 1. Webスクレイピング
