@@ -24,22 +24,16 @@
 ## 機能一覧
 ### 【管理画面】
 | ログイン画面 | 記事一覧画面 |
-| ---- | ---- |
-| ![ログイン画面](/Users/ogi-dai/dpro/portfolio_cms_app/img/admin-frontend/login.png) | ![記事一覧]</Users/ogi-dai/dpro/portfolio_cms_app/img/admin-frontend/article-list.png> |
+| ------------- | ------------- |
+| ![ログイン画面](/img/admin-frontend/login.png) | ![記事一覧](/img/admin-frontend/article-list.png) |
 | メールアドレスとパスワードでの認証機能を実装しました。 | 作成した記事のステータス管理や作成日などが一覧で確認できます。 |
 
 | 記事編集画面 | 画像管理画面 |
-| ---- | ---- |
-| ![記事編集画面](/Users/ogi-dai/dpro/portfolio_cms_app/img/admin-frontend/article-form.gif) | ![画像管理]</Users/ogi-dai/dpro/portfolio_cms_app/img/admin-frontend/image.png> |
+| ------------- | ------------- |
+| ![記事編集画面](/img/admin-frontend/article-form.gif) | ![画像管理](/img/admin-frontend/image.png) |
 | Markdown形式で記事を編集、その他アイキャッチ画像やmetaタグなども編集できます。 | 画像のアップロードと管理機能を実装しました。 |
 
-### 【ブログ画面】
-- 最新記事一覧
-  - 全記事
-  - カテゴリ別
-  - タグ別
-- 記事ページ
-## 各画面ごとの実装ポイント
+## 実装ポイント
 ### Rails API
 - 記事自動生成機能について
   - `perform`メソッドで複数のPythonスクリプトを呼び出し、記事の自動生成を行なっている。
@@ -53,16 +47,24 @@
 - 事前に設計したプロンプトをもとに、Gemini APIから実際にコンテンツを自動生成。
 - JSON形式で返すことで、Rails側からのエラーハンドリングがしやすくしている。
 ### React
--
-## カタログ設計
+- 管理画面はSEO最適化が不要なため、クライアント再度のみで画面遷移可能なSPAで実装。
+- Markdownエディタや画像アップロード機能を実装。
+- 記事を複数削除が可能となります。
+- JWTをlocalStorageに保存し、APIリクエスト時に`Authorization`ヘッダーを付与する実装をしています。
+### Next.js
+- ブログ画面はSEO最適化する必要があるため、Pre-rendering機能を提供しているSSRで実装。
+- `getServerSideProps`を使用し、初回アクセス時に記事データをAPIから取得して表示しています。
+
+## その他関連資料
+### カタログ設計
 https://docs.google.com/spreadsheets/d/1FWzUq65WYtL9W5-CyxKlk3CAp8lYN3GAIsbLKvAWH90/edit?gid=782464957#gid=782464957
-## テーブル定義署
+### テーブル定義署
 https://docs.google.com/spreadsheets/d/1FWzUq65WYtL9W5-CyxKlk3CAp8lYN3GAIsbLKvAWH90/edit?gid=2020033787#gid=2020033787
-## ER図
+### ER図
 https://app.diagrams.net/#G1XlJVCUTCwJ_jS9k_NkYp0EShRhTSdGlu#%7B%22pageId%22%3A%22iz7lFp_31lQFbATgsLB6%22%7D
 <img width="1223" alt="スクリーンショット 2024-12-25 14 35 43" src="https://github.com/user-attachments/assets/dfb08891-73e6-498c-af51-180ee333daec" />
-## 画面遷移図
+### 画面遷移図
 https://app.diagrams.net/#G1XlJVCUTCwJ_jS9k_NkYp0EShRhTSdGlu#%7B%22pageId%22%3A%22Yv7dz2-JqmFhlFjNYIA8%22%7D
 <img width="1680" alt="スクリーンショット 2024-12-25 14 36 24" src="https://github.com/user-attachments/assets/76d7036e-6cee-46bd-8662-67a670204c72" />
-## ワイヤーフレーム
+### ワイヤーフレーム
 https://app.diagrams.net/#G1XlJVCUTCwJ_jS9k_NkYp0EShRhTSdGlu#%7B%22pageId%22%3A%22PlB1XOqYMGXzPXKvK5lO%22%7D
